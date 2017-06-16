@@ -192,15 +192,17 @@ def test_migrate_nomigration_plan(mocker):
                     {
                         'version': 'v3',
                         'plan': [
-                            ('v3-a-ddl.sql', True, '/somewhere/v3-a-ddl.sql'),
+                            ('v3-a-ddl.sql', True, '/somewhere/v3-a-ddl.sql',
+                             False),
                             ('v3-b-ddl.sql', False,
-                             '/somewhere/manual/v3-b-ddl.sql'),
+                             '/somewhere/manual/v3-b-ddl.sql', True),
                         ]
                     },
                     {
                         'version': 'v4',
                         'plan': [
-                            ('v4-a-ddl.sql', False, '/somewhere/v4-a-ddl.sql'),
+                            ('v4-a-ddl.sql', False, '/somewhere/v4-a-ddl.sql',
+                             False),
                         ]
                     }
                 ],
@@ -245,15 +247,17 @@ def test_migrate_with_migration_plan(mocker):
                 {
                     'version': 'v3',
                     'plan': [
-                        ('v3-a-ddl.sql', True, '/somewhere/v3-a-ddl.sql'),
+                        ('v3-a-ddl.sql', True, '/somewhere/v3-a-ddl.sql',
+                         False),
                         ('v3-b-ddl.sql', False,
-                         '/somewhere/manual/v3-b-ddl.sql'),
+                         '/somewhere/manual/v3-b-ddl.sql', True),
                     ]
                 },
                 {
                     'version': 'v4',
                     'plan': [
-                        ('v4-a-ddl.sql', False, '/somewhere/v4-a-ddl.sql'),
+                        ('v4-a-ddl.sql', False, '/somewhere/v4-a-ddl.sql',
+                         False),
                     ]
                 }
             ],

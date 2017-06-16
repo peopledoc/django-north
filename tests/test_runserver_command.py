@@ -33,14 +33,14 @@ def test_runserver_check_migrations(mocker):
             {
                 'version': 'v3',
                 'plan': [
-                    ('a-ddl.sql', True, '/somewhere/a-ddl.sql'),
-                    ('b-ddl.sql', False, '/somewhere/manual/b-ddl.sql'),
+                    ('a-ddl.sql', True, '/somewhere/a-ddl.sql', False),
+                    ('b-ddl.sql', False, '/somewhere/manual/b-ddl.sql', True),
                 ]
             },
             {
                 'version': 'v4',
                 'plan': [
-                    ('a-ddl.sql', False, '/somewhere/a-ddl.sql'),
+                    ('a-ddl.sql', False, '/somewhere/a-ddl.sql', False),
                 ]
             }
         ],
@@ -62,14 +62,14 @@ def test_runserver_check_migrations(mocker):
             {
                 'version': 'v3',
                 'plan': [
-                    ('a-ddl.sql', True, '/somewhere/a-ddl.sql'),
-                    ('b-ddl.sql', True, '/somewhere/manual/b-ddl.sql'),
+                    ('a-ddl.sql', True, '/somewhere/a-ddl.sql', False),
+                    ('b-ddl.sql', True, '/somewhere/manual/b-ddl.sql', True),
                 ]
             },
             {
                 'version': 'v4',
                 'plan': [
-                    ('a-ddl.sql', True, '/somewhere/a-ddl.sql'),
+                    ('a-ddl.sql', True, '/somewhere/a-ddl.sql', False),
                 ]
             }
         ],

@@ -22,7 +22,9 @@ class Command(RunserverCommand):
 
         has_migrations = any(
             [
-                any([not applied for mig, applied, path in plan['plan']])
+                any([not applied
+                     for mig, applied, path, is_manual
+                     in plan['plan']])
                 for plan in migration_plan['plans']
             ]
         )

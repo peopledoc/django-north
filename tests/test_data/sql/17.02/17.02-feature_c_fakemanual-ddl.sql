@@ -1,11 +1,5 @@
- -- comment
---
- --
-SELECT * from foo;
-
---
-
 --meta-psql:do-until-0
+-- it's a ddl file ! this is a data migration => dml
 
 WITH sender_data AS (
     SELECT
@@ -34,5 +28,3 @@ FROM sender_data;
 
 
 --meta-psql:done
-SELECT * from foo;
- --

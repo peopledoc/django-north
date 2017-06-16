@@ -41,9 +41,9 @@ class Command(BaseCommand):
             version = plan['version']
             if self.verbosity >= 1:
                 self.stdout.write(self.style.MIGRATE_LABEL(version))
-            for mig, applied, path in plan['plan']:
+            for mig, applied, path, is_manual in plan['plan']:
                 title = mig
-                if '/manual/' in path:
+                if is_manual:
                     title += ' (manual)'
                 if applied:
                     if self.verbosity >= 1:

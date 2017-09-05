@@ -3,7 +3,7 @@
 History
 -------
 
-0.1.6 (unreleased)
+0.1.6 (2017-09-05)
 ++++++++++++++++++
 
 - Add tests for Django 1.11

@@ -245,6 +245,8 @@ custom SQL and CREATE INDEX SQL statements for the init of a DB schema, for an
 external app with a migration folder (as ``django.contrib.auth`` app for example),
 put this in your ``settings.py`` :
 
+For Django < 1.9:
+
 .. code-block:: python
 
     class DisableMigrations(object):
@@ -253,7 +255,22 @@ put this in your ``settings.py`` :
             return True
 
         def __getitem__(self, item):
-            return "notmigrations"
+            return 'notmigrations'
+
+
+    MIGRATION_MODULES = DisableMigrations()
+
+For Django >= 1.9:
+
+.. code-block:: python
+
+    class DisableMigrations(object):
+
+        def __contains__(self, item):
+            return True
+
+        def __getitem__(self, item):
+            return None
 
 
     MIGRATION_MODULES = DisableMigrations()

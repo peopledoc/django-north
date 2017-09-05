@@ -12,6 +12,7 @@ clean-build: ## remove build artifacts
 	rm -fr build/
 	rm -fr dist/
 	rm -fr *.egg-info
+	find . -name '__pycache__' -exec rm -rf {} +
 
 clean-pyc: ## remove Python file artifacts
 	find . -name '*.pyc' -exec rm -f {} +
@@ -30,10 +31,7 @@ test-all: ## run tests on every Python version with tox
 coverage: ## check code coverage quickly with the default Python
 	COVERAGE=1 ./runtests
 
-docs: ## generate Sphinx HTML documentation, including API docs
-	rm -f docs/django-north.rst
-	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ django_north
+docs: ## generate Sphinx HTML documentation
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 

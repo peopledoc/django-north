@@ -75,10 +75,14 @@ def get_applied_versions():
     Reuse django migration table.
     """
     recorder = MigrationRecorder(connection)
-    return list(recorder.migration_qs.filter(
+    applied_versions = list(recorder.migration_qs.filter(
         app__in=get_known_versions()
     ).values_list(
         'app', flat=True).order_by('app').distinct())
+
+    # sort versions
+    applied_versions.sort(key=StrictVersion)
+    return applied_versions
 
 
 def get_current_version():

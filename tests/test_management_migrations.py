@@ -1,6 +1,7 @@
 import os
 
 from django.core.exceptions import ImproperlyConfigured
+from django.db import connection
 
 import pytest
 
@@ -24,6 +25,18 @@ def test_get_known_versions(settings):
     settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'test_data/sql')
     result = migrations.get_known_versions()
     assert result == ['16.9', '16.11', '16.12', '17.01', '17.02', '17.3']
+
+
+@pytest.mark.django_db
+def test_get_applied_versions(mocker):
+    mocker.patch(
+        'django_north.management.migrations.get_known_versions',
+        return_value=['1.0', '1.1', '1.2', '1.3', '1.10'])
+
+    recorder = migrations.MigrationRecorder(connection)
+    recorder.record_applied('1.10', 'fake-ddl.sql')
+    result = migrations.get_applied_versions()
+    assert result == ['1.0', '1.1', '1.2', '1.3', '1.10']
 
 
 def test_get_migrations_to_apply(settings):

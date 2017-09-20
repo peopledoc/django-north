@@ -45,6 +45,6 @@ def test_sqlall(mocker, settings):
         'FOREIGN KEY ("author_id") REFERENCES "north_app_author" ("id") '
         'DEFERRABLE INITIALLY DEFERRED\n'
         'CREATE INDEX "INDEX_NAME" ON "north_app_book" ("author_id")\n'
-        + '\n' * (0 if get_docs_version() == '1.10' else 1)
+        + '\n' * (0 if get_docs_version() in ['1.10', '1.11'] else 1)
         + 'COMMIT;\n'
     )

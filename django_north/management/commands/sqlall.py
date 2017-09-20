@@ -70,10 +70,6 @@ def sql_create_model(editor, model):
     # Add any field index and index_together's
     editor.deferred_sql.extend(editor._model_indexes_sql(model))
 
-    # Make M2M tables
-    for field in model._meta.local_many_to_many:
-        if field.rel.through._meta.auto_created:
-            output += sql_create_model(editor, field.rel.through)
     return output
 
 

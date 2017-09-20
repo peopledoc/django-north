@@ -15,6 +15,7 @@ class CustomAppConfig(AppConfig):
 def test_get_all_contenttypes_for_app_config():
     ct1 = ContentType.objects.get(app_label='north_app', model='author')
     ct2 = ContentType.objects.get(app_label='north_app', model='book')
+    ct3 = ContentType.objects.get(app_label='north_app', model='reader')
     app_config = apps.get_app_config('north_app')
 
     result = contenttypes.get_all_contenttypes_for_app_config(app_config)
@@ -22,6 +23,7 @@ def test_get_all_contenttypes_for_app_config():
     assert result == {
         'author': ct1,
         'book': ct2,
+        'reader': ct3,
     }
 
 

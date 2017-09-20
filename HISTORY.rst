@@ -7,6 +7,7 @@ History
 ++++++++++++++++++
 
 - Detect manual files if not stored in the 'manual' dir.
+- Fix unicode error with SimpleBlock
 
 
 0.1.7 (2017-09-06)

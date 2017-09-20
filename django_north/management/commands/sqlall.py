@@ -46,13 +46,11 @@ def sql_create_model(editor, model):
             if autoinc_sql:
                 editor.deferred_sql.extend(autoinc_sql)
 
-    # Add any unique_togethers
+    # Add any unique_togethers (always deferred, as some fields might be
+    # created afterwards, like geometry fields with some backends)
     for fields in model._meta.unique_together:
         columns = [model._meta.get_field(field).column for field in fields]
-        column_sqls.append(editor.sql_create_table_unique % {
-            "columns": ", ".join(
-                editor.quote_name(column) for column in columns),
-        })
+        editor.deferred_sql.append(editor._create_unique_sql(model, columns))
     # Make the table
     sql = editor.sql_create_table % {
         "table": editor.quote_name(model._meta.db_table),

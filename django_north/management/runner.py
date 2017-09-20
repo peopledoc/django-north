@@ -5,6 +5,8 @@ from django.conf import settings
 import six
 import sqlparse
 
+from django_north.management.migrations import is_manual_migration
+
 logger = logging.getLogger(__name__)
 
 
@@ -93,15 +95,15 @@ class MetaBlock(Block):
 
 
 class Script(object):
-    def __init__(self, file_handle):
-        is_manual = self.is_manual(file_handle.name)
+    def __init__(self, file_handler):
+        is_manual = is_manual_migration(file_handler)
         if is_manual:
             self.block_list = [Block()]
-        elif self.contains_non_transactional_keyword(file_handle):
+        elif self.contains_non_transactional_keyword(file_handler):
             self.block_list = [Block()]
         else:
             self.block_list = [SimpleBlock()]
-        for line in file_handle:
+        for line in file_handler:
             if line.startswith("--meta-psql:") and is_manual:
                 self.block_list[-1].close()
                 command = line.split(":")[1].strip()
@@ -119,18 +121,15 @@ class Script(object):
         for block in self.block_list:
             block.run(db)
 
-    def is_manual(self, file_name):
-        return '/manual/' in file_name
-
-    def contains_non_transactional_keyword(self, file_handle):
+    def contains_non_transactional_keyword(self, file_handler):
         keywords = getattr(
             settings, 'NORTH_NON_TRANSACTIONAL_KEYWORDS',
             ['CONCURRENTLY', 'ALTER TYPE'])
-        for line in file_handle:
+        for line in file_handler:
             for kw in keywords:
                 if kw.lower() in line.lower():
-                    file_handle.seek(0)
+                    file_handler.seek(0)
                     return True
 
-        file_handle.seek(0)
+        file_handler.seek(0)
         return False

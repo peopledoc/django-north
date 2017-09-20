@@ -42,6 +42,26 @@ def test_script_init(settings):
     assert isinstance(script.block_list[2], SimpleBlock) is False
     assert isinstance(script.block_list[2], Block) is True
 
+    # Manual script not in 'manual' subdirectory
+    path = os.path.join(settings.NORTH_MIGRATIONS_ROOT,
+                        '17.02/17.02-feature_b_manual-dml.sql')
+    with io.open(path, 'r', encoding='utf8') as f:
+        script = Script(f)
+    assert len(script.block_list) == 3
+    assert isinstance(script.block_list[0], SimpleBlock) is False
+    assert isinstance(script.block_list[0], Block) is True
+    assert isinstance(script.block_list[1], MetaBlock) is True
+    assert isinstance(script.block_list[2], SimpleBlock) is False
+    assert isinstance(script.block_list[2], Block) is True
+
+    # None manual script not in 'manual' subdirectory
+    path = os.path.join(settings.NORTH_MIGRATIONS_ROOT,
+                        '17.02/17.02-feature_c_fakemanual-ddl.sql')
+    with io.open(path, 'r', encoding='utf8') as f:
+        script = Script(f)
+    assert len(script.block_list) == 1
+    assert isinstance(script.block_list[0], SimpleBlock) is True
+
     # Non manual script but it contains 'CONCURRENTLY' keyword
     settings.NORTH_NON_TRANSACTIONAL_KEYWORDS = ['CONCURRENTLY']
     path = os.path.join(settings.NORTH_MIGRATIONS_ROOT,
@@ -52,7 +72,7 @@ def test_script_init(settings):
     assert isinstance(script.block_list[0], SimpleBlock) is False
     assert isinstance(script.block_list[0], Block) is True
 
-    # Non manual script but 'CONCURRENTLY' is not a keywor
+    # Non manual script but 'CONCURRENTLY' is not a keyword
     settings.NORTH_NON_TRANSACTIONAL_KEYWORDS = []
     path = os.path.join(settings.NORTH_MIGRATIONS_ROOT,
                         '17.01/17.01-feature_b-ddl.sql')

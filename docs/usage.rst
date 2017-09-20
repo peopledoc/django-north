@@ -46,10 +46,9 @@ Migration repository tree example:
 .. code-block:: console
 
     1.0/
-        manual/
-            1.0-feature_a-020-dml.sql
         1.0-0-version-dml.sql
         1.0-feature_a-010-ddl.sql
+        1.0-feature_a-020-dml.sql
     1.1/
         1.1-0-version-dml.sql
     2.0/
@@ -69,6 +68,8 @@ See also some examples in ``tests/test_data/sql`` folder (used for unit tests),
 or in ``tests/north_project/sql`` folder (used for realistic tests).
 
 The migrations are alphabetical ordered.
+
+Only files which name ends with ``ddl.sql`` and ``dml.sql`` are run.
 
 Currect version detector
 ........................
@@ -135,6 +136,64 @@ And the version upgrade in the first migration of each version (a dml file):
 .. code-block:: sql
 
     COMMENT ON TABLE django_site IS 'version 2.0';
+
+Manual migrations
+-----------------
+
+A "manual" migration file is a dml migration which should be run more than once.
+
+For example, if you have a big table with a lot of data, and a data migration
+to do, you probably would like to run the migration by chunks.
+
+Manual migration files can stored in the "manual" subdirectory of a version directory:
+
+.. code-block:: console
+
+    1.0/
+        manual/
+            1.0-0-version-dml.sql
+        1.0-feature_a-010-ddl.sql
+        1.0-feature_a-020-dml.sql
+
+Else, a migration file can be considered as a manual migration file if:
+
+* the end of the migration file name is ``dml.sql``
+* and it contains a meta instruction ``--meta-psql:``
+
+Meta instructions
+.................
+
+do-until-0
+++++++++++
+
+Example:
+
+.. code-block:: sql
+
+    BEGIN;
+
+
+    -- example of a manual migration
+
+
+    --meta-psql:do-until-0
+
+    with to_update as (
+        SELECT
+            id
+        FROM north_app_book
+        WHERE num_pages = 0
+        LIMIT 5000
+    )
+    UPDATE north_app_book SET num_pages = 42 WHERE id IN (
+        SELECT id FROM to_update
+    );
+
+    --meta-psql:done
+
+
+    COMMIT;
+
 
 Available Commands
 ------------------

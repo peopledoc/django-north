@@ -1,10 +1,3 @@
- -- comment
---
- --
-SELECT * from foo;
-
---
-
 --meta-psql:do-until-0
 
 WITH author_data AS (
@@ -34,5 +27,3 @@ FROM author_data;
 
 
 --meta-psql:done
-SELECT * from foo;
- --

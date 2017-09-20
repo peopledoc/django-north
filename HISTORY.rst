@@ -6,7 +6,7 @@ History
 0.1.8 (unreleased)
 ++++++++++++++++++
 
-- Nothing changed yet.
+- Detect manual files if not stored in the 'manual' dir.
 
 
 0.1.7 (2017-09-06)

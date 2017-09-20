@@ -47,9 +47,9 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.MIGRATE_LABEL("  {}".format(plan['version'])))
             # print plan
-            for mig, applied, path in plan['plan']:
+            for mig, applied, path, is_manual in plan['plan']:
                 title = mig
-                if '/manual/' in path:
+                if is_manual:
                     title += ' (manual)'
                 if applied:
                     self.stdout.write("  [X] %s" % title)

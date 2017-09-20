@@ -259,6 +259,21 @@ This command has no effects if the ``NORTH_MANAGE_DB`` setting is disabled.
 Changed Commands
 ----------------
 
+sqlall
+......
+
+Django < 1.9: the command is simplified (no custom SQL support, no check of migration folder)
+
+Django >= 1.9: the command is backported.
+
+.. code-block:: console
+
+    $ ./tests_manage.py sqlall <app>
+
+Usefull to print the CREATE TABLE and CREATE INDEX SQL statements for the
+init of a DB schema, for an external app with a migration folder
+(as ``django.contrib.auth`` app for example).
+
 flush
 .....
 
@@ -295,50 +310,6 @@ These commands are disabled whatever the value of the ``NORTH_MANAGE_DB`` settin
 
 Tips
 ----
-
-Output SQL commands
-...................
-
-For example, if you want to use the ``sqlall`` command to prints the CREATE TABLE,
-custom SQL and CREATE INDEX SQL statements for the init of a DB schema, for an
-external app with a migration folder (as ``django.contrib.auth`` app for example),
-put this in your ``settings.py`` :
-
-For Django < 1.9:
-
-.. code-block:: python
-
-    class DisableMigrations(object):
-
-        def __contains__(self, item):
-            return True
-
-        def __getitem__(self, item):
-            return 'notmigrations'
-
-
-    MIGRATION_MODULES = DisableMigrations()
-
-For Django >= 1.9:
-
-.. code-block:: python
-
-    class DisableMigrations(object):
-
-        def __contains__(self, item):
-            return True
-
-        def __getitem__(self, item):
-            return None
-
-
-    MIGRATION_MODULES = DisableMigrations()
-
-Then run the ``sqlall command``:
-
-.. code-block:: console
-
-    $ ./tests_manage.py sqlall <app>
 
 Generate Schema Files
 .....................

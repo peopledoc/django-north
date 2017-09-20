@@ -9,4 +9,4 @@ if [ -z ${COVERAGE+x} ];
     COVERAGE_FLAGS=""
 fi
 
-pytest -v $COVERAGE_FLAGS $TESTS
+pytest -vv $COVERAGE_FLAGS $TESTS

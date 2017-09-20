@@ -68,7 +68,7 @@ class Block(object):
 class SimpleBlock(Block):
     def run(self, connection):
         with connection.cursor() as cursor:
-            cursor.execute(str(self.content))
+            cursor.execute(self.content)
 
 
 class MetaBlock(Block):

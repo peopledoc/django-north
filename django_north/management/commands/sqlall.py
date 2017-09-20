@@ -31,18 +31,9 @@ def sql_create_model(editor, model):
         params.extend(extra_params)
         # FK
         if field.rel and field.db_constraint:
-            to_table = field.rel.to._meta.db_table
-            to_column = field.rel.to._meta.get_field(
-                field.rel.field_name).column
-            if editor.connection.features.supports_foreign_keys:
-                editor.deferred_sql.append(
-                    editor._create_fk_sql(
-                        model, field, "_fk_%(to_table)s_%(to_column)s"))
-            elif editor.sql_create_inline_fk:
-                definition += " " + editor.sql_create_inline_fk % {
-                    "to_table": editor.quote_name(to_table),
-                    "to_column": editor.quote_name(to_column),
-                }
+            editor.deferred_sql.append(
+                editor._create_fk_sql(
+                    model, field, "_fk_%(to_table)s_%(to_column)s"))
         # Add the SQL to our big list
         column_sqls.append("%s %s" % (
             editor.quote_name(field.column),

@@ -3,7 +3,7 @@
 History
 -------
 
-0.1.9 (unreleased)
+0.2.0 (2017-10-16)
 ++++++++++++++++++
 
 - Backport the `sqlall` command.

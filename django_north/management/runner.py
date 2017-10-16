@@ -68,7 +68,8 @@ class Block(object):
 class SimpleBlock(Block):
     def run(self, connection):
         with connection.cursor() as cursor:
-            cursor.execute(self.content)
+            statements = clean_sql_code(self.content)
+            cursor.execute(statements)
 
 
 class MetaBlock(Block):

@@ -1,5 +1,7 @@
 BEGIN;
 
+\timing
+
 
 -- The field Author.date_of_birth is removed from the code.
 -- But as the sql field is not nullable, to have a blue/green sql migration,

@@ -7,6 +7,7 @@ History
 ++++++++++++++++++
 
 - Backport the `sqlall` command.
+- Sanitize sql statements for SimpleBlock.
 
 
 0.1.8 (2017-09-20)

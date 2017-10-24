@@ -125,7 +125,7 @@ class Script(object):
     def contains_non_transactional_keyword(self, file_handler):
         keywords = getattr(
             settings, 'NORTH_NON_TRANSACTIONAL_KEYWORDS',
-            ['CONCURRENTLY', 'ALTER TYPE'])
+            ['CONCURRENTLY', 'ALTER TYPE', 'VACUUM'])
         for line in file_handler:
             for kw in keywords:
                 if kw.lower() in line.lower():

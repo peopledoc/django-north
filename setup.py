@@ -17,7 +17,7 @@ setup(
     long_description=readme + '\n\n' + history,
     author=u'Lauréline Guérin',
     author_email='laureline.guerin@people-doc.com',
-    url='https://github.com/novafloss/django-north',
+    url='https://github.com/peopledoc/django-north',
     packages=[
         'django_north',
     ],

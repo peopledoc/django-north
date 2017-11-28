@@ -5,14 +5,14 @@ Django North
 .. image:: https://badge.fury.io/py/django-north.png
     :target: https://pypi.org/pypi/django-north
 
-.. image:: https://travis-ci.org/novafloss/django-north.png?branch=master
-    :target: https://travis-ci.org/novafloss/django-north
+.. image:: https://travis-ci.org/peopledoc/django-north.png?branch=master
+    :target: https://travis-ci.org/peopledoc/django-north
 
 .. image:: https://readthedocs.org/projects/django-north/badge/
     :target: http://django-north.readthedocs.io/en/latest/
 
-.. image:: https://img.shields.io/codecov/c/github/novafloss/django-north/master.svg
-    :target: https://codecov.io/github/novafloss/django-north?branch=master
+.. image:: https://img.shields.io/codecov/c/github/peopledoc/django-north/master.svg
+    :target: https://codecov.io/github/peopledoc/django-north?branch=master
 
 Yet another way to manage migrations: DBA as a service.
 

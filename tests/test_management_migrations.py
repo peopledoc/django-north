@@ -334,6 +334,44 @@ def test_get_version_for_init(settings, mocker):
         migrations.get_version_for_init()
 
 
+def test_get_version_for_init_force_settings(settings, mocker):
+    root = os.path.dirname(__file__)
+    settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'test_data/sql')
+    mock_versions = mocker.patch(
+        'django_north.management.migrations.get_known_versions')
+
+    mock_versions.return_value = ['16.12', '17.1', '17.2', '17.3']
+
+    # target version < schema
+    settings.NORTH_TARGET_VERSION = '17.2'
+    settings.NORTH_SCHEMA_VERSION = '17.3'
+    message = (
+        "settings.NORTH_TARGET_VERSION is improperly configured: "
+        "settings.NORTH_SCHEMA_VERSION is more recent.")
+    with pytest.raises(ImproperlyConfigured, message=message):
+        migrations.get_version_for_init()
+
+    # schema does not exist
+    settings.NORTH_TARGET_VERSION = '17.3'
+    settings.NORTH_SCHEMA_VERSION = '17.2'
+    message = "Can not find a schema to init the DB."
+    with pytest.raises(migrations.DBException, message=message):
+        migrations.get_version_for_init()
+
+    # ok, schema exists
+    settings.NORTH_TARGET_VERSION = '17.3'
+    settings.NORTH_SCHEMA_VERSION = '17.1'
+    assert migrations.get_version_for_init() == '17.1'
+
+    settings.NORTH_TARGET_VERSION = '17.3'
+    settings.NORTH_SCHEMA_VERSION = '16.12'
+    assert migrations.get_version_for_init() == '16.12'
+
+    settings.NORTH_TARGET_VERSION = '17.3'
+    settings.NORTH_SCHEMA_VERSION = '17.3'
+    assert migrations.get_version_for_init() == '17.3'
+
+
 def test_get_fixtures_for_init(settings, mocker):
     root = os.path.dirname(__file__)
     settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'test_data/sql')

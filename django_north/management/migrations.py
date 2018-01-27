@@ -208,7 +208,7 @@ def get_migrations_to_apply(version):
     return migrations
 
 
-def get_closest_version(target_version, sql_tpl):
+def get_closest_version(target_version, sql_tpl, force_version=None):
     """
     Get the version of a file (schema or fixtures) to use to init a DB.
     Take the closest to the target_version. Can be the same version, or older.
@@ -223,6 +223,20 @@ def get_closest_version(target_version, sql_tpl):
             'settings.NORTH_TARGET_VERSION is improperly configured: '
             'version {} not found.'.format(
                 settings.NORTH_TARGET_VERSION))
+
+    # should we set a version from settings ?
+    if force_version:
+        if force_version not in known_versions[:target_version_index+1]:
+            raise ImproperlyConfigured(
+                'settings.NORTH_TARGET_VERSION is improperly configured: '
+                'settings.NORTH_SCHEMA_VERSION is more recent.')
+
+        path = sql_tpl.format(force_version)
+        if os.path.exists(path):
+            return force_version
+
+        # not found
+        return None
 
     def get_version(index):
         version = known_versions[index]
@@ -239,6 +253,9 @@ def get_closest_version(target_version, sql_tpl):
     if os.path.exists(path):
         return version
 
+    # not found
+    return None
+
 
 def get_version_for_init():
     """
@@ -249,7 +266,8 @@ def get_version_for_init():
         os.path.join(
             settings.NORTH_MIGRATIONS_ROOT,
             'schemas',
-            getattr(settings, 'NORTH_SCHEMA_TPL', schema_default_tpl)))
+            getattr(settings, 'NORTH_SCHEMA_TPL', schema_default_tpl)),
+        force_version=getattr(settings, 'NORTH_SCHEMA_VERSION', None))
 
     if version is None:
         raise DBException('Can not find a schema to init the DB.')

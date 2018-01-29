@@ -25,6 +25,8 @@ List of available settings:
 * ``NORTH_MIGRATIONS_ROOT``: a path to your migration repository. **required**
 * ``NORTH_TARGET_VERSION``: the target SQL version
   (the version needed for your codebase). **required**
+* ``NORTH_SCHEMA_VERSION``: optional.
+  To be used if you need to force the version used to init a new DB.
 * ``NORTH_SCHEMA_TPL``: default value ``schema_{}.sql``
 * ``NORTH_FIXTURES_TPL``: default value ``fixtures_{}.sql``
 * ``NORTH_ADDITIONAL_SCHEMA_FILES``: list of sql files to load before the schema.

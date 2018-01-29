@@ -3,7 +3,7 @@
 History
 -------
 
-0.2.1 (unreleased)
+0.2.1 (2018-01-29)
 ++++++++++++++++++
 
 - Add `VACUUM` to `NORTH_NON_TRANSACTIONAL_KEYWORDS` default settings.

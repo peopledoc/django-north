@@ -7,6 +7,7 @@ History
 ++++++++++++++++++
 
 - Add `VACUUM` to `NORTH_NON_TRANSACTIONAL_KEYWORDS` default settings.
+- Add a setting `NORTH_SCHEMA_VERSION` to force the schema to be used to init a DB.
 
 
 0.2.0 (2017-10-16)

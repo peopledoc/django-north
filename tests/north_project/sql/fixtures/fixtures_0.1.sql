@@ -33,6 +33,9 @@ INSERT INTO auth_permission(codename, name, content_type_id) VALUES('add_site', 
 INSERT INTO auth_permission(codename, name, content_type_id) VALUES('change_site', 'Can change site', (SELECT id FROM django_content_type WHERE app_label = 'sites' AND model = 'site'));
 INSERT INTO auth_permission(codename, name, content_type_id) VALUES('delete_site', 'Can delete site', (SELECT id FROM django_content_type WHERE app_label = 'sites' AND model = 'site'));
 
-INSERT INTO sql_version(version_num) VALUES ('0.1') ON CONFLICT (version_num) DO NOTHING;
+-- possible with pg >= 9.5:
+-- INSERT INTO sql_version(version_num) VALUES ('0.1') ON CONFLICT (version_num) DO NOTHING;
+-- pg 9.4:
+INSERT INTO sql_version(version_num) SELECT '0.1' WHERE NOT EXISTS (SELECT 1 FROM sql_version WHERE version_num = '0.1');
 
 COMMIT;

@@ -13,7 +13,6 @@ from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.core.management.base import CommandError
 from django.core.management.color import no_style
-from django.core.management.sql import sql_flush
 from django.db import DEFAULT_DB_ALIAS
 from django.db import connections
 from django.db import transaction
@@ -30,6 +29,35 @@ logger = logging.getLogger(__name__)
 
 # warning: backport from django 1.8
 # this command changed a lot in 1.10
+
+
+def sql_flush(style, connection, only_django=False, reset_sequences=True,
+              allow_cascade=False):
+    """
+    Returns a list of the SQL statements used to flush the database.
+
+    If only_django is True, then only table names that have associated Django
+    models and are in INSTALLED_APPS will be included.
+    """
+    if only_django:
+        tables = connection.introspection.django_table_names(
+            only_existing=True, include_views=False)
+    else:
+        tables = connection.introspection.table_names(include_views=False)
+    # custom: do not flush migration tables
+    # because if you are running tests with a "reuse db" option,
+    # and a transactional test case flushed the test db,
+    # migration data must be kept so the next test run do not try
+    # to apply migrations again
+    protected_tables = getattr(
+        settings, 'NORTH_PROTECTED_TABLES',
+        ['django_migrations', 'sql_version'])
+    for protected in protected_tables:
+        if protected in tables:
+            tables.remove(protected)
+    seqs = connection.introspection.sequence_list() if reset_sequences else ()
+    statements = connection.ops.sql_flush(style, tables, seqs, allow_cascade)
+    return statements
 
 
 class Command(BaseCommand):

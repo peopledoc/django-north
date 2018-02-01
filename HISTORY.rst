@@ -6,7 +6,7 @@ History
 0.2.2 (unreleased)
 ++++++++++++++++++
 
-- Nothing changed yet.
+- Flush command: do not flush migration tables.
 
 
 0.2.1 (2018-01-29)

@@ -2,7 +2,6 @@ from django.apps import AppConfig
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.management import call_command
-from django.utils.six import StringIO
 
 import pytest
 
@@ -126,7 +125,7 @@ def test_missing_permissions(mocker):
     assert command.missing_permissions() == []
 
 
-def test_showfixtures(mocker):
+def test_showfixtures(capsys, mocker):
     mocker.patch(
         'django_north.management.commands.showfixtures.Command'
         '.unknown_contenttypes',
@@ -140,22 +139,22 @@ def test_showfixtures(mocker):
         '.missing_permissions',
         return_value=['INSERT 4', 'INSERT 5', 'INSERT 6'])
 
-    stdout = mocker.patch('sys.stdout', new_callable=StringIO)
     call_command('showfixtures')
-    assert stdout.getvalue() == (
+    captured = capsys.readouterr()
+    assert captured.out == (
         'INSERT 1\nINSERT 2\nINSERT 3\n'
         'INSERT 4\nINSERT 5\nINSERT 6\n')
 
-    stdout = mocker.patch('sys.stdout', new_callable=StringIO)
     call_command('showfixtures', unknown_contenttypes=True)
-    assert stdout.getvalue() == (
+    captured = capsys.readouterr()
+    assert captured.out == (
         'DELETE 1\nDELETE 2\nDELETE 3\n'
         'INSERT 1\nINSERT 2\nINSERT 3\n'
         'INSERT 4\nINSERT 5\nINSERT 6\n')
 
 
 @pytest.mark.django_db
-def test_showfixtures_for_real(mocker):
-    stdout = mocker.patch('sys.stdout', new_callable=StringIO)
+def test_showfixtures_for_real(capsys, mocker):
     call_command('showfixtures', unknown_contenttypes=True)
-    assert stdout.getvalue() == '\n'
+    captured = capsys.readouterr()
+    assert captured.out == '\n'

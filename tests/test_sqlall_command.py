@@ -1,13 +1,11 @@
 from django.core.management import call_command
-from django.utils.six import StringIO
 from django.utils.version import get_docs_version
 
 import pytest
 
 
 @pytest.mark.django_db
-def test_sqlall(mocker, settings):
-    stdout = mocker.patch('sys.stdout', new_callable=StringIO)
+def test_sqlall(capsys, mocker, settings):
     mocker.patch(
         'django.db.backends.base.schema.BaseDatabaseSchemaEditor'
         '._create_index_name',
@@ -15,7 +13,8 @@ def test_sqlall(mocker, settings):
 
     call_command('sqlall', 'north_app')
 
-    assert stdout.getvalue() == (
+    captured = capsys.readouterr()
+    assert captured.out == (
         'BEGIN;\n'
         'CREATE TABLE "north_app_author" '
         '("id" serial NOT NULL PRIMARY KEY, "name" varchar(100) NOT NULL)\n'

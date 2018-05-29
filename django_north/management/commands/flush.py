@@ -64,6 +64,8 @@ class Command(BaseCommand):
     help = ('Removes ALL DATA from the database, including data added during '
             'migrations. Unmigrated apps will also have their initial_data '
             'fixture reloaded. Does not achieve a "fresh install" state.')
+    stealth_options = ('reset_sequences', 'allow_cascade',
+                       'inhibit_post_migrate')
 
     def add_arguments(self, parser):
         parser.add_argument(

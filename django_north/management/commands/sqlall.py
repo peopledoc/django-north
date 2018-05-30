@@ -5,7 +5,6 @@ from django.core.management.base import CommandError
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db import router
 from django.utils.version import get_docs_version
-import django
 
 
 def sql_create_model(editor, model):
@@ -31,7 +30,7 @@ def sql_create_model(editor, model):
             definition += " %s" % col_type_suffix
         params.extend(extra_params)
         # FK
-        if get_docs_version(django.VERSION) == '1.8':
+        if get_docs_version() == '1.8':
             # Field.rel is renamed to Field.remote_field in Django 1.9
             # https://docs.djangoproject.com/en/1.9/releases/1.9/#field-rel-changes
             remote_field = field.rel
@@ -105,7 +104,10 @@ def sql_create(app_config, style, connection):
             output += sql_create_model(editor, model)
             final_output.extend(editor.deferred_sql)
             editor.deferred_sql = []
-
+    if get_docs_version().startswith('2'):
+        # Content of final_output are Statement objects which need to be
+        # converted as str
+        final_output = [str(statement) for statement in final_output]
     return output + final_output
 
 

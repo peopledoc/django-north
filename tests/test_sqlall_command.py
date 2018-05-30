@@ -36,14 +36,16 @@ def test_sqlall(capsys, mocker, settings):
         'ADD CONSTRAINT "INDEX_NAME" FOREIGN KEY ("reader_id") '
         'REFERENCES "north_app_reader" ("id") DEFERRABLE INITIALLY DEFERRED\n'
         'ALTER TABLE "north_app_book_readers" '
-        'ADD CONSTRAINT "INDEX_NAME" UNIQUE ("book_id", "reader_id")\n'
-        'CREATE INDEX "INDEX_NAME" ON "north_app_book_readers" ("book_id")\n'
+        + ('ADD CONSTRAINT INDEX_NAME UNIQUE ("book_id", "reader_id")\n'
+           if get_docs_version() == '2.0' else
+           'ADD CONSTRAINT "INDEX_NAME" UNIQUE ("book_id", "reader_id")\n')
+        + 'CREATE INDEX "INDEX_NAME" ON "north_app_book_readers" ("book_id")\n'
         'CREATE INDEX "INDEX_NAME" ON "north_app_book_readers" ("reader_id")\n'
         'ALTER TABLE "north_app_book" '
         'ADD CONSTRAINT "INDEX_NAME" '
         'FOREIGN KEY ("author_id") REFERENCES "north_app_author" ("id") '
         'DEFERRABLE INITIALLY DEFERRED\n'
         'CREATE INDEX "INDEX_NAME" ON "north_app_book" ("author_id")\n'
-        + '\n' * (0 if get_docs_version() in ['1.10', '1.11'] else 1)
+        + '\n' * (1 if get_docs_version() in ['1.8', '1.9'] else 0)
         + 'COMMIT;\n'
     )

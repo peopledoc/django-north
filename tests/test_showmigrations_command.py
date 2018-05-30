@@ -13,7 +13,8 @@ def test_migrate(mocker, settings, manage):
     mock_handle = mocker.patch(
         'django.core.management.commands.showmigrations.Command.handle')
     mock_plan = mocker.patch(
-        'django_north.management.commands.showmigrations.Command.show_list')
+        'django_north.management.commands.showmigrations.Command.show_list',
+        return_value=b'')
 
     call_command('showmigrations')
 

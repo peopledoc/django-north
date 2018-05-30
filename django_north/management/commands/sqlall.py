@@ -5,6 +5,7 @@ from django.core.management.base import CommandError
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db import router
 from django.utils.version import get_docs_version
+import django
 
 
 def sql_create_model(editor, model):
@@ -30,7 +31,13 @@ def sql_create_model(editor, model):
             definition += " %s" % col_type_suffix
         params.extend(extra_params)
         # FK
-        if field.rel and field.db_constraint:
+        if get_docs_version(django.VERSION) == '1.8':
+            # Field.rel is renamed to Field.remote_field in Django 1.9
+            # https://docs.djangoproject.com/en/1.9/releases/1.9/#field-rel-changes
+            remote_field = field.rel
+        else:
+            remote_field = field.remote_field
+        if remote_field and field.db_constraint:
             editor.deferred_sql.append(
                 editor._create_fk_sql(
                     model, field, "_fk_%(to_table)s_%(to_column)s"))

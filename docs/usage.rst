@@ -264,8 +264,6 @@ Changed Commands
 sqlall
 ......
 
-Django < 1.9: the command is simplified (no custom SQL support, no check of migration folder)
-
 Django >= 1.9: the command is backported.
 
 .. code-block:: console

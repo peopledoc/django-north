@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
+
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
-
-from six import PY3
 
 
 readme = open('README.rst').read()
@@ -26,7 +26,7 @@ setup(
     ],
     include_package_data=True,
     install_requires=[
-        "Django>=1.8" if PY3 else "Django>=1.8,<2.0"
+        "Django>=1.11" if sys.version_info.major == 3 else "Django>=1.11,<2.0",
         "sqlparse",
         "six",
     ],
@@ -37,9 +37,6 @@ setup(
     classifiers=[
         'Development Status :: 4 - Beta',
         'Framework :: Django',
-        'Framework :: Django :: 1.8',
-        'Framework :: Django :: 1.9',
-        'Framework :: Django :: 1.10',
         'Framework :: Django :: 1.11',
         'Framework :: Django :: 2.0',
         'Intended Audience :: Developers',

@@ -1,8 +1,5 @@
-from distutils.version import StrictVersion
 import os
 import sys
-
-from django.utils import version
 
 import dj_database_url
 
@@ -45,9 +42,7 @@ class DisableMigrations(object):
         return True
 
     def __getitem__(self, item):
-        if StrictVersion(version.get_version()) >= StrictVersion('1.9'):
-            return None
-        return 'notmigrations'
+        return None
 
 
 MIGRATION_MODULES = DisableMigrations()

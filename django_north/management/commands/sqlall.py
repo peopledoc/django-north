@@ -30,12 +30,7 @@ def sql_create_model(editor, model):
             definition += " %s" % col_type_suffix
         params.extend(extra_params)
         # FK
-        if get_docs_version() == '1.8':
-            # Field.rel is renamed to Field.remote_field in Django 1.9
-            # https://docs.djangoproject.com/en/1.9/releases/1.9/#field-rel-changes
-            remote_field = field.rel
-        else:
-            remote_field = field.remote_field
+        remote_field = field.remote_field
         if remote_field and field.db_constraint:
             editor.deferred_sql.append(
                 editor._create_fk_sql(

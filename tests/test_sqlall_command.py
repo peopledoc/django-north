@@ -46,6 +46,5 @@ def test_sqlall(capsys, mocker, settings):
         'FOREIGN KEY ("author_id") REFERENCES "north_app_author" ("id") '
         'DEFERRABLE INITIALLY DEFERRED\n'
         'CREATE INDEX "INDEX_NAME" ON "north_app_book" ("author_id")\n'
-        + '\n' * (1 if get_docs_version() in ['1.8', '1.9'] else 0)
         + 'COMMIT;\n'
     )

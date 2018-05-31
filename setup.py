@@ -6,6 +6,9 @@ try:
 except ImportError:
     from distutils.core import setup
 
+from six import PY3
+
+
 readme = open('README.rst').read()
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 version = open('VERSION').read().strip()
@@ -23,7 +26,7 @@ setup(
     ],
     include_package_data=True,
     install_requires=[
-        "Django>=1.8",
+        "Django>=1.8" if PY3 else "Django>=1.8,<2.0"
         "sqlparse",
         "six",
     ],

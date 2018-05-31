@@ -1,7 +1,6 @@
 import os.path
 
 from django.core.management import call_command
-from django.utils.six import StringIO
 
 import pytest
 
@@ -40,7 +39,7 @@ def test_migrate_run_script(settings, mocker):
     assert len(mock_run.call_args_list) == 1
 
 
-def test_migrate_init_schema(settings, mocker):
+def test_migrate_init_schema(capsys, settings, mocker):
     root = os.path.dirname(__file__)
     settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'test_data/sql')
 
@@ -50,7 +49,6 @@ def test_migrate_init_schema(settings, mocker):
     mock_run_script = mocker.patch(
         'django_north.management.commands.migrate.Command.run_script')
 
-    stdout = mocker.patch('sys.stdout', new_callable=StringIO)
     command = migrate.Command()
     command.verbosity = 2
 
@@ -65,7 +63,8 @@ def test_migrate_init_schema(settings, mocker):
     assert mock_run_script.call_args_list[1] == mocker.call(
         os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'fixtures',
                      'fixtures_16.12.sql'))
-    assert stdout.getvalue() == (
+    captured = capsys.readouterr()
+    assert captured.out == (
         'Load schema\n'
         '  Applying 16.12...\n'
         'Load fixtures\n'
@@ -73,7 +72,6 @@ def test_migrate_init_schema(settings, mocker):
     )
 
     mock_run_script.reset_mock()
-    stdout = mocker.patch('sys.stdout', new_callable=StringIO)
     command = migrate.Command()
     command.verbosity = 2
 
@@ -90,7 +88,8 @@ def test_migrate_init_schema(settings, mocker):
     assert mock_run_script.call_args_list[2] == mocker.call(
         os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'fixtures',
                      'fixtures_16.12.sql'))
-    assert stdout.getvalue() == (
+    captured = capsys.readouterr()
+    assert captured.out == (
         'Load extension.sql\n'
         'Load schema\n'
         '  Applying 16.12...\n'
@@ -99,7 +98,6 @@ def test_migrate_init_schema(settings, mocker):
     )
 
     mock_run_script.reset_mock()
-    stdout = mocker.patch('sys.stdout', new_callable=StringIO)
     command = migrate.Command()
     command.verbosity = 2
 
@@ -119,7 +117,8 @@ def test_migrate_init_schema(settings, mocker):
     assert mock_run_script.call_args_list[3] == mocker.call(
         os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'fixtures',
                      'fixtures_16.12.sql'))
-    assert stdout.getvalue() == (
+    captured = capsys.readouterr()
+    assert captured.out == (
         'Load extension.sql\n'
         'Load roles.sql\n'
         'Load schema\n'
@@ -129,7 +128,6 @@ def test_migrate_init_schema(settings, mocker):
     )
 
     mock_run_script.reset_mock()
-    stdout = mocker.patch('sys.stdout', new_callable=StringIO)
     command = migrate.Command()
     command.verbosity = 2
 
@@ -143,7 +141,8 @@ def test_migrate_init_schema(settings, mocker):
     assert mock_run_script.call_args_list[0] == mocker.call(
         os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'schemas',
                      'schema_17.3.sql'))
-    assert stdout.getvalue() == (
+    captured = capsys.readouterr()
+    assert captured.out == (
         'Load schema\n'
         '  Applying 17.3...\n'
         'Load fixtures\n'
@@ -151,7 +150,6 @@ def test_migrate_init_schema(settings, mocker):
     )
 
     mock_run_script.reset_mock()
-    stdout = mocker.patch('sys.stdout', new_callable=StringIO)
     command = migrate.Command()
     command.verbosity = 2
 
@@ -165,13 +163,14 @@ def test_migrate_init_schema(settings, mocker):
     assert mock_run_script.call_args_list[0] == mocker.call(
         os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'schemas',
                      'schema_16.11.sql'))
-    assert stdout.getvalue() == (
+    captured = capsys.readouterr()
+    assert captured.out == (
         'Load schema\n'
         '  Applying 16.11...\n'
     )
 
 
-def test_migrate_nomigration_plan(mocker):
+def test_migrate_nomigration_plan(capsys, mocker):
     mock_run_script = mocker.patch(
         'django_north.management.commands.migrate.Command.run_script')
     mock_init_schema = mocker.patch(
@@ -209,7 +208,6 @@ def test_migrate_nomigration_plan(mocker):
             }
         ])
 
-    stdout = mocker.patch('sys.stdout', new_callable=StringIO)
     call_command('migrate')
     assert len(mock_init_schema.call_args_list) == 1
     assert mock_run_script.call_args_list == [
@@ -220,7 +218,8 @@ def test_migrate_nomigration_plan(mocker):
         mocker.call('v3', 'v3-b-ddl.sql'),
         mocker.call('v4', 'v4-a-ddl.sql'),
     ]
-    assert stdout.getvalue() == (
+    captured = capsys.readouterr()
+    assert captured.out == (
         'v3\n'
         '  v3-a-ddl.sql already applied\n'
         '  Applying v3-b-ddl.sql (manual)...\n'
@@ -229,7 +228,7 @@ def test_migrate_nomigration_plan(mocker):
     )
 
 
-def test_migrate_with_migration_plan(mocker):
+def test_migrate_with_migration_plan(capsys, mocker):
     mock_run_script = mocker.patch(
         'django_north.management.commands.migrate.Command.run_script')
     mock_init_schema = mocker.patch(
@@ -263,7 +262,6 @@ def test_migrate_with_migration_plan(mocker):
             ],
         })
 
-    stdout = mocker.patch('sys.stdout', new_callable=StringIO)
     call_command('migrate')
     assert mock_init_schema.called is False
     assert mock_run_script.call_args_list == [
@@ -274,7 +272,8 @@ def test_migrate_with_migration_plan(mocker):
         mocker.call('v3', 'v3-b-ddl.sql'),
         mocker.call('v4', 'v4-a-ddl.sql'),
     ]
-    assert stdout.getvalue() == (
+    captured = capsys.readouterr()
+    assert captured.out == (
         'v3\n'
         '  v3-a-ddl.sql already applied\n'
         '  Applying v3-b-ddl.sql (manual)...\n'

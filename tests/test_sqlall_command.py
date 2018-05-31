@@ -1,13 +1,11 @@
 from django.core.management import call_command
-from django.utils.six import StringIO
 from django.utils.version import get_docs_version
 
 import pytest
 
 
 @pytest.mark.django_db
-def test_sqlall(mocker, settings):
-    stdout = mocker.patch('sys.stdout', new_callable=StringIO)
+def test_sqlall(capsys, mocker, settings):
     mocker.patch(
         'django.db.backends.base.schema.BaseDatabaseSchemaEditor'
         '._create_index_name',
@@ -15,7 +13,8 @@ def test_sqlall(mocker, settings):
 
     call_command('sqlall', 'north_app')
 
-    assert stdout.getvalue() == (
+    captured = capsys.readouterr()
+    assert captured.out == (
         'BEGIN;\n'
         'CREATE TABLE "north_app_author" '
         '("id" serial NOT NULL PRIMARY KEY, "name" varchar(100) NOT NULL)\n'
@@ -37,14 +36,15 @@ def test_sqlall(mocker, settings):
         'ADD CONSTRAINT "INDEX_NAME" FOREIGN KEY ("reader_id") '
         'REFERENCES "north_app_reader" ("id") DEFERRABLE INITIALLY DEFERRED\n'
         'ALTER TABLE "north_app_book_readers" '
-        'ADD CONSTRAINT "INDEX_NAME" UNIQUE ("book_id", "reader_id")\n'
-        'CREATE INDEX "INDEX_NAME" ON "north_app_book_readers" ("book_id")\n'
+        + ('ADD CONSTRAINT INDEX_NAME UNIQUE ("book_id", "reader_id")\n'
+           if get_docs_version() == '2.0' else
+           'ADD CONSTRAINT "INDEX_NAME" UNIQUE ("book_id", "reader_id")\n')
+        + 'CREATE INDEX "INDEX_NAME" ON "north_app_book_readers" ("book_id")\n'
         'CREATE INDEX "INDEX_NAME" ON "north_app_book_readers" ("reader_id")\n'
         'ALTER TABLE "north_app_book" '
         'ADD CONSTRAINT "INDEX_NAME" '
         'FOREIGN KEY ("author_id") REFERENCES "north_app_author" ("id") '
         'DEFERRABLE INITIALLY DEFERRED\n'
         'CREATE INDEX "INDEX_NAME" ON "north_app_book" ("author_id")\n'
-        + '\n' * (0 if get_docs_version() in ['1.10', '1.11'] else 1)
         + 'COMMIT;\n'
     )

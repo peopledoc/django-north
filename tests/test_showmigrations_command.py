@@ -1,5 +1,4 @@
 from django.core.management import call_command
-from django.utils.six import StringIO
 
 import pytest
 
@@ -14,7 +13,8 @@ def test_migrate(mocker, settings, manage):
     mock_handle = mocker.patch(
         'django.core.management.commands.showmigrations.Command.handle')
     mock_plan = mocker.patch(
-        'django_north.management.commands.showmigrations.Command.show_list')
+        'django_north.management.commands.showmigrations.Command.show_list',
+        return_value=b'')
 
     call_command('showmigrations')
 
@@ -22,18 +22,17 @@ def test_migrate(mocker, settings, manage):
     assert mock_plan.called == bool(manage)
 
 
-def test_showmigrations(mocker):
+def test_showmigrations(capsys, mocker):
     mock_plan = mocker.patch(
         'django_north.management.migrations.build_migration_plan')
 
     # schema not inited
-    stdout = mocker.patch('sys.stdout', new_callable=StringIO)
     mock_plan.return_value = None
     call_command('showmigrations')
-    assert stdout.getvalue() == 'Schema not inited\n'
+    captured = capsys.readouterr()
+    assert captured.out == 'Schema not inited\n'
 
     # schema inited
-    stdout = mocker.patch('sys.stdout', new_callable=StringIO)
     mock_plan.return_value = {
         'current_version': 'v2',
         'init_version': 'v1',
@@ -54,7 +53,8 @@ def test_showmigrations(mocker):
         ],
     }
     call_command('showmigrations')
-    assert stdout.getvalue() == (
+    captured = capsys.readouterr()
+    assert captured.out == (
         'Current version of the DB:\n'
         '  v2\n'
         'Schema used to init the DB:\n'

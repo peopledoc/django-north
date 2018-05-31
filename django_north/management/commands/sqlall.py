@@ -30,7 +30,8 @@ def sql_create_model(editor, model):
             definition += " %s" % col_type_suffix
         params.extend(extra_params)
         # FK
-        if field.rel and field.db_constraint:
+        remote_field = field.remote_field
+        if remote_field and field.db_constraint:
             editor.deferred_sql.append(
                 editor._create_fk_sql(
                     model, field, "_fk_%(to_table)s_%(to_column)s"))
@@ -98,7 +99,10 @@ def sql_create(app_config, style, connection):
             output += sql_create_model(editor, model)
             final_output.extend(editor.deferred_sql)
             editor.deferred_sql = []
-
+    if get_docs_version().startswith('2'):
+        # Content of final_output are Statement objects which need to be
+        # converted as str
+        final_output = [str(statement) for statement in final_output]
     return output + final_output
 
 

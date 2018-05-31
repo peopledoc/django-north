@@ -10,6 +10,8 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.management import call_command
+from django.core.management import get_commands
+from django.core.management import load_command_class
 from django.core.management.base import BaseCommand
 from django.core.management.base import CommandError
 from django.core.management.color import no_style
@@ -64,6 +66,8 @@ class Command(BaseCommand):
     help = ('Removes ALL DATA from the database, including data added during '
             'migrations. Unmigrated apps will also have their initial_data '
             'fixture reloaded. Does not achieve a "fresh install" state.')
+    stealth_options = ('reset_sequences', 'allow_cascade',
+                       'inhibit_post_migrate')
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -156,11 +160,20 @@ Are you sure you want to do this?
 
             # Reinstall the initial_data fixture.
             if options.get('load_initial_data'):
+                # Remove any option that is not handle by loaddata
+                # We need to load loaddata command, get its parser to extract
+                # valid options
+                app_name = get_commands()['loaddata']
+                command = load_command_class(app_name, 'loaddata')
+                parser = command.create_parser('loaddata', 'initial_data')
+                valid_options = [action.dest for action in parser._actions
+                                 if action.option_strings]
+                app_options = {k: v for k, v in options.items()
+                               if k in valid_options}
                 # Reinstall the initial_data fixture for apps without
                 # migrations.
                 from django.db.migrations.executor import MigrationExecutor
                 executor = MigrationExecutor(connection)
-                app_options = options.copy()
                 for app_label in executor.loader.unmigrated_apps:
                     app_options['app_label'] = app_label
                     try:

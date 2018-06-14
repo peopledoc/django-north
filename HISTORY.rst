@@ -7,6 +7,7 @@ History
 ++++++++++++++++++
 
 - Add support for Django 2.0 (#31)
+- Add a "DISCARD ALL" command run at the end of each script. It adds a new settings variable: ``NORTH_DISCARD_ALL`` (#33)
 
 
 0.2.2 (2018-02-01)

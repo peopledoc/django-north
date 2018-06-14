@@ -91,6 +91,8 @@ def test_simple_script_run(settings, mocker):
     mock_run = mocker.patch('django_north.management.runner.Block.run')
     mock_meta_run = mocker.patch(
         'django_north.management.runner.MetaBlock.run')
+    mock_discard_run = mocker.patch(
+        'django_north.management.runner.DiscardBlock.run')
 
     # Simple script
     path = os.path.join(settings.NORTH_MIGRATIONS_ROOT,
@@ -103,6 +105,35 @@ def test_simple_script_run(settings, mocker):
     assert mock_simple_run.call_args_list == [mocker.call('foo')]
     assert mock_run.called is False
     assert mock_meta_run.called is False
+    assert mock_discard_run.called is True
+
+
+def test_simple_script_run_no_discard(settings, mocker):
+    root = os.path.dirname(__file__)
+    settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'test_data/sql')
+    settings.NORTH_DISCARD_ALL = False
+
+    mock_simple_run = mocker.patch(
+        'django_north.management.runner.SimpleBlock.run')
+    mock_run = mocker.patch('django_north.management.runner.Block.run')
+    mock_meta_run = mocker.patch(
+        'django_north.management.runner.MetaBlock.run')
+    mock_discard_run = mocker.patch(
+        'django_north.management.runner.DiscardBlock.run')
+
+    # Simple script
+    path = os.path.join(settings.NORTH_MIGRATIONS_ROOT,
+                        '16.12/16.12-0-version-dml.sql')
+    with io.open(path, 'r', encoding='utf8') as f:
+        script = Script(f)
+    assert len(script.block_list) == 1
+
+    script.run('foo')
+    assert mock_simple_run.call_args_list == [mocker.call('foo')]
+    assert mock_run.called is False
+    assert mock_meta_run.called is False
+    # The most important result here: we don't run the discard command.
+    assert mock_discard_run.called is False
 
 
 def test_manual_script_run(settings, mocker):
@@ -114,6 +145,8 @@ def test_manual_script_run(settings, mocker):
     mock_run = mocker.patch('django_north.management.runner.Block.run')
     mock_meta_run = mocker.patch(
         'django_north.management.runner.MetaBlock.run')
+    mock_discard_run = mocker.patch(
+        'django_north.management.runner.DiscardBlock.run')
 
     # Manual script with metablocks
     path = os.path.join(settings.NORTH_MIGRATIONS_ROOT,
@@ -126,6 +159,7 @@ def test_manual_script_run(settings, mocker):
     assert mock_simple_run.called is False
     assert mock_run.call_args_list == [mocker.call('foo'), mocker.call('foo')]
     assert mock_meta_run.call_args_list == [mocker.call('foo')]
+    assert mock_discard_run.called is True
 
 
 def test_block_run(settings, mocker):

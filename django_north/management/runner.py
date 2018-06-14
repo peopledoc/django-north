@@ -72,6 +72,12 @@ class SimpleBlock(Block):
             cursor.execute(statements)
 
 
+class DiscardBlock(SimpleBlock):
+    def __init__(self):
+        super(DiscardBlock, self).__init__()
+        self.content = "DISCARD ALL;"
+
+
 class MetaBlock(Block):
     def __init__(self, command):
         super(MetaBlock, self).__init__()
@@ -121,6 +127,12 @@ class Script(object):
     def run(self, db):
         for block in self.block_list:
             block.run(db)
+
+        # RUN a DISCARD ALL command at the end of each script.
+        # By default, set to True for security reasons.
+        discard_all = getattr(settings, 'NORTH_DISCARD_ALL', True)
+        if discard_all:
+            DiscardBlock().run(db)
 
     def contains_non_transactional_keyword(self, file_handler):
         keywords = getattr(

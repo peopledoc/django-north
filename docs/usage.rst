@@ -39,6 +39,11 @@ List of available settings:
   SQL instruction by SQL instruction. Else, a non manual file is run in a
   single execute call.
   Default value: ``['CONCURRENTLY', 'ALTER TYPE', 'VACUUM']``
+* ``NORTH_DISCARD_ALL``: when set to ``True`` (this is the default value),
+  will run a ``DISCARD ALL;`` SQL statement after each executed file. More on
+  the root cause here `Issue #33 on Github <https://github.com/peopledoc/django-north/issues/33>`_
+  (TL;DR: for security reasons, it's better to run this to reset all variables
+  previously set, especially the ``search_path``).
 
 In production environments, ``NORTH_MANAGE_DB`` should be disabled, because
 the database is managed directly by the DBA team (database as a service).

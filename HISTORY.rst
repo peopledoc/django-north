@@ -3,7 +3,7 @@
 History
 -------
 
-0.2.3 (unreleased)
+0.2.3 (2018-06-15)
 ++++++++++++++++++
 
 - Add support for Django 2.0 (#31)

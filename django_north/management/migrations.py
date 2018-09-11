@@ -5,7 +5,6 @@ from importlib import import_module
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.db import connection
 from django.db.migrations.recorder import \
     MigrationRecorder as DjangoMigrationRecorder
 from django.db.utils import ProgrammingError
@@ -70,7 +69,7 @@ def get_known_versions():
     return versions
 
 
-def get_applied_versions():
+def get_applied_versions(connection):
     """
     Return the list of applied versions.
     Reuse django migration table.
@@ -86,7 +85,7 @@ def get_applied_versions():
     return applied_versions
 
 
-def get_current_version():
+def get_current_version(connection):
     """
     Return the current version of the database.
     Return None if the schema is not inited.
@@ -102,10 +101,10 @@ def get_current_version():
     module = import_module(module_path)
     factory = getattr(module, factory_name)
 
-    return factory()
+    return factory(connection)
 
 
-def get_current_version_from_table():
+def get_current_version_from_table(connection):
     """
     Return the current version of the database, from sql_version table.
     Return None if the table does not exist (schema not inited).
@@ -130,7 +129,7 @@ def get_current_version_from_table():
     return versions[-1]
 
 
-def get_current_version_from_comment():
+def get_current_version_from_comment(connection):
     """
     Return the current version of the database, from django_site comment.
     Return None if the table django_site does not exist (schema not inited).
@@ -156,7 +155,7 @@ def get_current_version_from_comment():
     return comment.replace('version ', '').strip()
 
 
-def get_applied_migrations(version):
+def get_applied_migrations(version, connection):
     """
     Return the list of applied migrations for the given version.
     Reuse django migration table.
@@ -307,20 +306,20 @@ def is_manual_migration(file_handler):
     return False
 
 
-def build_migration_plan():
+def build_migration_plan(connection):
     """
     Return the list of migrations by version,
     from the version used to init the DB to the current target version.
     """
     # get current version
-    current_version = get_current_version()
+    current_version = get_current_version(connection)
     if current_version is None:
         # schema not inited
         return None
     # get known versions
     known_versions = get_known_versions()
     # get applied versions
-    applied_versions = get_applied_versions()
+    applied_versions = get_applied_versions(connection)
 
     migration_plan = {
         'current_version': current_version,
@@ -359,7 +358,7 @@ def build_migration_plan():
     for version in versions_to_apply:
         version_plan = []
         # get applied migrations
-        applied_migrations = get_applied_migrations(version)
+        applied_migrations = get_applied_migrations(version, connection)
         # get migrations to apply
         migrations_to_apply = get_migrations_to_apply(version)
         migs = list(migrations_to_apply.keys())

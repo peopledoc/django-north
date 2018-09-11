@@ -1,6 +1,8 @@
 import os.path
 
 from django.core.management import call_command
+from django.db import connection
+from django.db import DEFAULT_DB_ALIAS
 
 import pytest
 
@@ -32,6 +34,7 @@ def test_migrate_run_script(settings, mocker):
     mock_run = mocker.patch('django_north.management.runner.Script.run')
 
     command = migrate.Command()
+    command.connection = connection
 
     path = os.path.join(settings.NORTH_MIGRATIONS_ROOT,
                         '16.12/16.12-0-version-dml.sql')
@@ -280,3 +283,20 @@ def test_migrate_with_migration_plan(capsys, mocker):
         'v4\n'
         '  Applying v4-a-ddl.sql...\n'
     )
+
+
+def test_migrate_database(capsys, mocker):
+    mock_build = mocker.patch(
+        'django_north.management.migrations.build_migration_plan')
+
+    call_command('migrate')
+    assert mock_build.called_once()
+    connection = mock_build.call_args[0][0]
+    assert connection.alias == DEFAULT_DB_ALIAS
+
+    mock_build.reset_mock()
+
+    call_command('migrate', '--database', 'foo')
+    assert mock_build.called_once()
+    connection = mock_build.call_args[0][0]
+    assert connection.alias == 'foo'

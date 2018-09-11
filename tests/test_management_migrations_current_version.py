@@ -1,4 +1,5 @@
 
+from django.db import connection
 from django.db.utils import ProgrammingError
 
 import pytest
@@ -20,7 +21,7 @@ def test_get_current_version(settings, mocker):
     if hasattr(settings, 'NORTH_CURRENT_VERSION_DETECTOR'):
         del settings.NORTH_CURRENT_VERSION_DETECTOR
 
-    result = migrations.get_current_version()
+    result = migrations.get_current_version(connection)
     assert mock_table.called is True
     assert mock_comment.called is False
     assert result == 'from_table'
@@ -33,7 +34,7 @@ def test_get_current_version(settings, mocker):
         '.get_current_version_from_foo')
 
     with pytest.raises(AttributeError):
-        migrations.get_current_version()
+        migrations.get_current_version(connection)
     assert mock_table.called is False
     assert mock_comment.called is False
 
@@ -44,7 +45,7 @@ def test_get_current_version(settings, mocker):
         'django_north.management.migrations'
         '.get_current_version_from_table')
 
-    result = migrations.get_current_version()
+    result = migrations.get_current_version(connection)
     assert mock_table.called is True
     assert mock_comment.called is False
     assert result == 'from_table'
@@ -56,7 +57,7 @@ def test_get_current_version(settings, mocker):
         'django_north.management.migrations'
         '.get_current_version_from_comment')
 
-    result = migrations.get_current_version()
+    result = migrations.get_current_version(connection)
     assert mock_table.called is False
     assert mock_comment.called is True
     assert result == 'from_comment'
@@ -69,17 +70,17 @@ def test_get_current_version_from_table(mocker):
 
     # table does not exist
     cursor.execute.side_effect = ProgrammingError
-    assert migrations.get_current_version_from_table() is None
+    assert migrations.get_current_version_from_table(connection) is None
 
     cursor.execute.side_effect = None
 
     # no entries
     cursor.fetchall.return_value = []
-    assert migrations.get_current_version_from_table() is None
+    assert migrations.get_current_version_from_table(connection) is None
 
     # many entries
     cursor.fetchall.return_value = [('16.9',), ('foo',), ('17.1',), ('17.02',)]
-    assert migrations.get_current_version_from_table() == '17.02'
+    assert migrations.get_current_version_from_table(connection) == '17.02'
 
 
 def test_get_current_version_from_comment(mocker):
@@ -89,7 +90,7 @@ def test_get_current_version_from_comment(mocker):
 
     # table does not exist
     cursor.execute.side_effect = ProgrammingError
-    assert migrations.get_current_version_from_comment() is None
+    assert migrations.get_current_version_from_comment(connection) is None
 
     cursor.execute.side_effect = None
 
@@ -97,20 +98,20 @@ def test_get_current_version_from_comment(mocker):
     cursor.fetchone.return_value = [None]
     message = "No comment found on django_site."
     with pytest.raises(migrations.DBException, message=message):
-        migrations.get_current_version_from_comment()
+        migrations.get_current_version_from_comment(connection)
 
     # bad comment
     cursor.fetchone.return_value = ['comment']
     message = "No version found in django_site's comment."
     with pytest.raises(migrations.DBException, message=message):
-        migrations.get_current_version_from_comment()
+        migrations.get_current_version_from_comment(connection)
     cursor.fetchone.return_value = ['version']
     with pytest.raises(migrations.DBException, message=message):
-        migrations.get_current_version_from_comment()
+        migrations.get_current_version_from_comment(connection)
     cursor.fetchone.return_value = ['version17.01']
     with pytest.raises(migrations.DBException, message=message):
-        migrations.get_current_version_from_comment()
+        migrations.get_current_version_from_comment(connection)
 
     # correct comment
     cursor.fetchone.return_value = [' version  17.01 ']
-    assert migrations.get_current_version_from_comment() == '17.01'
+    assert migrations.get_current_version_from_comment(connection) == '17.01'

@@ -5,7 +5,7 @@ import os.path
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from django.db import connection
+from django.db import connections
 from django.db import DEFAULT_DB_ALIAS
 
 from django_north.management import migrations
@@ -41,20 +41,21 @@ class Command(BaseCommand):
 
         self.verbosity = options.get('verbosity')
 
+        self.connection = connections[options['database']]
         self.migrate()
 
     def migrate(self):
         # build miration plan
-        migration_plan = migrations.build_migration_plan()
+        migration_plan = migrations.build_migration_plan(self.connection)
 
         if migration_plan is None:
             # schema not inited
             self.init_schema()
             # reload migration_plan
-            migration_plan = migrations.build_migration_plan()
+            migration_plan = migrations.build_migration_plan(self.connection)
 
         # play migrations
-        recorder = migrations.MigrationRecorder(connection)
+        recorder = migrations.MigrationRecorder(self.connection)
         for plan in migration_plan['plans']:
             version = plan['version']
             if self.verbosity >= 1:
@@ -117,4 +118,4 @@ class Command(BaseCommand):
     def run_script(self, path):
         with io.open(path, 'r', encoding='utf8') as f:
             script = Script(f)
-            script.run(connection)
+            script.run(self.connection)

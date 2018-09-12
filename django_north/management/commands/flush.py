@@ -114,7 +114,7 @@ class Command(BaseCommand):
 
         # custom: only_django False
         # get current version before flush
-        current_version = get_current_version()
+        current_version = get_current_version(connection)
         sql_list = sql_flush(self.style, connection, only_django=False,
                              reset_sequences=reset_sequences,
                              allow_cascade=allow_cascade)

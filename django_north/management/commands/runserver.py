@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.contrib.staticfiles.management.commands.runserver import \
     Command as RunserverCommand
+from django.db import connection
 
 from django_north.management import migrations
 
@@ -11,7 +12,7 @@ class Command(RunserverCommand):
 
     def check_migrations(self):
         try:
-            migration_plan = migrations.build_migration_plan()
+            migration_plan = migrations.build_migration_plan(connection)
         except migrations.DBException as e:
             self.stdout.write(self.style.NOTICE("\n{}\n".format(e)))
             return

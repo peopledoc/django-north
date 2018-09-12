@@ -35,7 +35,7 @@ def test_get_applied_versions(mocker):
 
     recorder = migrations.MigrationRecorder(connection)
     recorder.record_applied('1.10', 'fake-ddl.sql')
-    result = migrations.get_applied_versions()
+    result = migrations.get_applied_versions(connection)
     assert result == ['1.0', '1.1', '1.2', '1.3', '1.10']
 
 
@@ -173,12 +173,12 @@ def test_build_migration_plan(settings, mocker):
 
     # current version is None
     mock_get_current_version.return_value = None
-    result = migrations.build_migration_plan()
+    result = migrations.build_migration_plan(connection)
     assert result is None
 
     # current version is not None
     mock_get_current_version.return_value = '16.12'
-    result = migrations.build_migration_plan()
+    result = migrations.build_migration_plan(connection)
     assert result['current_version'] == '16.12'
     assert result['init_version'] == '16.12'
     assert len(result['plans']) == 2
@@ -189,11 +189,11 @@ def test_build_migration_plan(settings, mocker):
     mock_get_current_version.return_value = 'foo'
     message = "The current version of the database is unknown: foo."
     with pytest.raises(migrations.DBException, message=message):
-        migrations.build_migration_plan()
+        migrations.build_migration_plan(connection)
 
     # current version is the last one
     mock_get_current_version.return_value = '17.02'
-    result = migrations.build_migration_plan()
+    result = migrations.build_migration_plan(connection)
     assert result['current_version'] == '17.02'
     assert result['init_version'] == '17.02'
     assert len(result['plans']) == 0
@@ -206,7 +206,7 @@ def test_build_migration_plan(settings, mocker):
         "settings.NORTH_TARGET_VERSION is improperly configured: "
         "version foo not found.")
     with pytest.raises(ImproperlyConfigured, message=message):
-        migrations.build_migration_plan()
+        migrations.build_migration_plan(connection)
 
     settings.NORTH_TARGET_VERSION = '17.02'
 
@@ -218,7 +218,7 @@ def test_build_migration_plan(settings, mocker):
         [],
         [],
     ]
-    result = migrations.build_migration_plan()
+    result = migrations.build_migration_plan(connection)
     assert result['current_version'] == '16.12'
     assert result['init_version'] == '16.11'
     assert len(result['plans']) == 3
@@ -234,7 +234,7 @@ def test_build_migration_plan(settings, mocker):
     mock_get_applied_migrations.side_effect = [
         [],
     ]
-    result = migrations.build_migration_plan()
+    result = migrations.build_migration_plan(connection)
     assert result['current_version'] == '17.02'
     assert result['init_version'] == '17.01'
     assert len(result['plans']) == 1
@@ -247,7 +247,7 @@ def test_build_migration_plan(settings, mocker):
         [],
         [],
     ]
-    result = migrations.build_migration_plan()
+    result = migrations.build_migration_plan(connection)
     assert result['current_version'] == '17.02'
     assert result['init_version'] == '16.12'
     assert len(result['plans']) == 2
@@ -265,7 +265,7 @@ def test_build_migration_plan(settings, mocker):
         ['16.12-0-version-dml.sql'],
         [],
     ]
-    result = migrations.build_migration_plan()
+    result = migrations.build_migration_plan(connection)
     assert result['current_version'] == '16.12'
     assert result['init_version'] == '16.11'
     assert len(result['plans']) == 2
@@ -282,7 +282,7 @@ def test_build_migration_plan(settings, mocker):
         [],
         [],
     ]
-    result = migrations.build_migration_plan()
+    result = migrations.build_migration_plan(connection)
     assert result['current_version'] == '17.02'
     assert result['init_version'] == '16.11'
     assert len(result['plans']) == 2

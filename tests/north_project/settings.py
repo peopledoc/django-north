@@ -18,7 +18,10 @@ if "DATABASE_URL" not in os.environ or \
 
 DEBUG = True
 USE_TZ = True
-DATABASES = {"default": dj_database_url.config()}
+DATABASES = {
+    "default": dj_database_url.config(),
+    "foo": dj_database_url.config(),
+}
 INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",

@@ -3,7 +3,7 @@
 History
 -------
 
-0.2.4 (unreleased)
+0.2.4 (2018-09-12)
 ++++++++++++++++++
 
 - Use `--database` option to determine which database to use in migrate command (#35)

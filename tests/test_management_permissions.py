@@ -46,21 +46,22 @@ def test_get_all_permissions():
     result = permissions.get_all_permissions([ct1, ct2])
     assert result == set([
         (ct2.pk, u'change_book'), (ct2.pk, u'delete_book'),
-        (ct2.pk, u'add_book'),
+        (ct2.pk, u'add_book'), (ct2.pk, u'view_book'),
         (ct1.pk, u'change_author'), (ct1.pk, u'add_author'),
-        (ct1.pk, u'delete_author'),
+        (ct1.pk, u'delete_author'), (ct1.pk, u'view_author'),
     ])
 
     result = permissions.get_all_permissions([ct1])
     assert result == set([
         (ct1.pk, u'change_author'), (ct1.pk, u'delete_author'),
-        (ct1.pk, u'add_author'),
+        (ct1.pk, u'add_author'), (ct1.pk, u'view_author'),
     ])
 
     Permission.objects.get(codename='delete_author').delete()
     result = permissions.get_all_permissions([ct1])
     assert result == set([
         (ct1.pk, u'change_author'), (ct1.pk, u'add_author'),
+        (ct1.pk, u'view_author'),
     ])
 
 

@@ -33,6 +33,13 @@ INSERT INTO auth_permission(codename, name, content_type_id) VALUES('add_site', 
 INSERT INTO auth_permission(codename, name, content_type_id) VALUES('change_site', 'Can change site', (SELECT id FROM django_content_type WHERE app_label = 'sites' AND model = 'site'));
 INSERT INTO auth_permission(codename, name, content_type_id) VALUES('delete_site', 'Can delete site', (SELECT id FROM django_content_type WHERE app_label = 'sites' AND model = 'site'));
 
+-- Django >= 2.1
+INSERT INTO auth_permission(codename, name, content_type_id) VALUES('view_permission', 'Can view permission', (SELECT id FROM django_content_type WHERE app_label = 'auth' AND model = 'permission'));
+INSERT INTO auth_permission(codename, name, content_type_id) VALUES('view_group', 'Can view group', (SELECT id FROM django_content_type WHERE app_label = 'auth' AND model = 'group'));
+INSERT INTO auth_permission(codename, name, content_type_id) VALUES('view_user', 'Can view user', (SELECT id FROM django_content_type WHERE app_label = 'auth' AND model = 'user'));
+INSERT INTO auth_permission(codename, name, content_type_id) VALUES('view_contenttype', 'Can view content type', (SELECT id FROM django_content_type WHERE app_label = 'contenttypes' AND model = 'contenttype'));
+INSERT INTO auth_permission(codename, name, content_type_id) VALUES('view_site', 'Can view site', (SELECT id FROM django_content_type WHERE app_label = 'sites' AND model = 'site'));
+
 -- possible with pg >= 9.5:
 -- INSERT INTO sql_version(version_num) VALUES ('0.1') ON CONFLICT (version_num) DO NOTHING;
 -- pg 9.4:

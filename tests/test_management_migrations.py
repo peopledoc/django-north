@@ -10,15 +10,15 @@ from django_north.management import migrations
 
 def test_get_known_versions(settings):
     # wrong path
-    message = "settings.NORTH_MIGRATIONS_ROOT is improperly configured."
+    message = r"settings\.NORTH_MIGRATIONS_ROOT is improperly configured."
 
     settings.NORTH_MIGRATIONS_ROOT = '/path/to/nowhere'
-    with pytest.raises(ImproperlyConfigured, message=message):
+    with pytest.raises(ImproperlyConfigured, match=message):
         migrations.get_known_versions()
 
     root = os.path.dirname(__file__)
     settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'foo')
-    with pytest.raises(ImproperlyConfigured, message=message):
+    with pytest.raises(ImproperlyConfigured, match=message):
         migrations.get_known_versions()
 
     # correct path
@@ -44,8 +44,8 @@ def test_get_migrations_to_apply(settings):
     settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'test_data/sql')
 
     # version folder does not exist
-    message = "No sql folder found for version foo."
-    with pytest.raises(migrations.DBException, message=message):
+    message = r"No sql folder found for version foo\."
+    with pytest.raises(migrations.DBException, match=message):
         migrations.get_migrations_to_apply('foo')
 
     # no manual folder
@@ -187,8 +187,8 @@ def test_build_migration_plan(settings, mocker):
 
     # current version is out of scope
     mock_get_current_version.return_value = 'foo'
-    message = "The current version of the database is unknown: foo."
-    with pytest.raises(migrations.DBException, message=message):
+    message = r"The current version of the database is unknown: foo\."
+    with pytest.raises(migrations.DBException, match=message):
         migrations.build_migration_plan(connection)
 
     # current version is the last one
@@ -203,9 +203,9 @@ def test_build_migration_plan(settings, mocker):
     # target version is out of scope
     settings.NORTH_TARGET_VERSION = 'foo'
     message = (
-        "settings.NORTH_TARGET_VERSION is improperly configured: "
-        "version foo not found.")
-    with pytest.raises(ImproperlyConfigured, message=message):
+        r"settings.NORTH_TARGET_VERSION is improperly configured: "
+        r"version foo not found\.")
+    with pytest.raises(ImproperlyConfigured, match=message):
         migrations.build_migration_plan(connection)
 
     settings.NORTH_TARGET_VERSION = '17.02'
@@ -301,9 +301,9 @@ def test_get_version_for_init(settings, mocker):
     # target version is out of scope
     settings.NORTH_TARGET_VERSION = 'foo'
     message = (
-        "settings.NORTH_TARGET_VERSION is improperly configured: "
-        "version foo not found.")
-    with pytest.raises(ImproperlyConfigured, message=message):
+        r"settings.NORTH_TARGET_VERSION is improperly configured: "
+        r"version foo not found\.")
+    with pytest.raises(ImproperlyConfigured, match=message):
         migrations.get_version_for_init()
 
     # schema for the version exists
@@ -316,8 +316,8 @@ def test_get_version_for_init(settings, mocker):
 
     # no schema for the version, and no ancestors
     settings.NORTH_TARGET_VERSION = '16.11'
-    message = "Can not find a schema to init the DB."
-    with pytest.raises(migrations.DBException, message=message):
+    message = r"Can not find a schema to init the DB\."
+    with pytest.raises(migrations.DBException, match=message):
         migrations.get_version_for_init()
 
     # no ancestors, but the schema exists
@@ -327,10 +327,10 @@ def test_get_version_for_init(settings, mocker):
 
     # wrong template
     settings.NORTH_SCHEMA_TPL = 'foo.sql'
-    with pytest.raises(migrations.DBException, message=message):
+    with pytest.raises(migrations.DBException, match=message):
         migrations.get_version_for_init()
     settings.NORTH_SCHEMA_TPL = 'foo{}.sql'
-    with pytest.raises(migrations.DBException, message=message):
+    with pytest.raises(migrations.DBException, match=message):
         migrations.get_version_for_init()
 
 
@@ -346,16 +346,16 @@ def test_get_version_for_init_force_settings(settings, mocker):
     settings.NORTH_TARGET_VERSION = '17.2'
     settings.NORTH_SCHEMA_VERSION = '17.3'
     message = (
-        "settings.NORTH_TARGET_VERSION is improperly configured: "
-        "settings.NORTH_SCHEMA_VERSION is more recent.")
-    with pytest.raises(ImproperlyConfigured, message=message):
+        r"settings\.NORTH_TARGET_VERSION is improperly configured: "
+        r"settings\.NORTH_SCHEMA_VERSION is more recent\.")
+    with pytest.raises(ImproperlyConfigured, match=message):
         migrations.get_version_for_init()
 
     # schema does not exist
     settings.NORTH_TARGET_VERSION = '17.3'
     settings.NORTH_SCHEMA_VERSION = '17.2'
-    message = "Can not find a schema to init the DB."
-    with pytest.raises(migrations.DBException, message=message):
+    message = r"Can not find a schema to init the DB\."
+    with pytest.raises(migrations.DBException, match=message):
         migrations.get_version_for_init()
 
     # ok, schema exists
@@ -382,9 +382,10 @@ def test_get_fixtures_for_init(settings, mocker):
 
     # target version is out of scope
     message = (
-        "settings.NORTH_TARGET_VERSION is improperly configured: "
-        "version foo not found.")
-    with pytest.raises(ImproperlyConfigured, message=message):
+        r"settings.NORTH_TARGET_VERSION is improperly configured: "
+        r"version foo not found\.")
+    settings.NORTH_TARGET_VERSION = 'foo'
+    with pytest.raises(ImproperlyConfigured, match=message):
         migrations.get_fixtures_for_init('foo')
 
     # fixtures for the version exists
@@ -395,7 +396,7 @@ def test_get_fixtures_for_init(settings, mocker):
 
     # no fixtures for the version, and no ancestors
     message = "Can not find fixtures to init the DB."
-    with pytest.raises(migrations.DBException, message=message):
+    with pytest.raises(migrations.DBException, match=message):
         migrations.get_fixtures_for_init('16.11')
 
     # no ancestors, but fixtures exists
@@ -404,8 +405,8 @@ def test_get_fixtures_for_init(settings, mocker):
 
     # wrong template
     settings.NORTH_FIXTURES_TPL = 'foo.sql'
-    with pytest.raises(migrations.DBException, message=message):
+    with pytest.raises(migrations.DBException, match=message):
         migrations.get_fixtures_for_init('16.12')
     settings.NORTH_FIXTURES_TPL = 'foo{}.sql'
-    with pytest.raises(migrations.DBException, message=message):
+    with pytest.raises(migrations.DBException, match=message):
         migrations.get_fixtures_for_init('16.12')

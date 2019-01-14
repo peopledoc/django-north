@@ -6,8 +6,7 @@ History
 0.2.5 (unreleased)
 ++++++++++++++++++
 
-- Nothing changed yet.
-
+- Add support for Django 2.1 & Python 3.7
 
 0.2.4 (2018-09-12)
 ++++++++++++++++++

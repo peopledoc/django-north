@@ -96,20 +96,20 @@ def test_get_current_version_from_comment(mocker):
 
     # no comment
     cursor.fetchone.return_value = [None]
-    message = "No comment found on django_site."
-    with pytest.raises(migrations.DBException, message=message):
+    message = r"No comment found on django_site\."
+    with pytest.raises(migrations.DBException, match=message):
         migrations.get_current_version_from_comment(connection)
 
     # bad comment
     cursor.fetchone.return_value = ['comment']
-    message = "No version found in django_site's comment."
-    with pytest.raises(migrations.DBException, message=message):
+    message = r"No version found in django_site's comment\."
+    with pytest.raises(migrations.DBException, match=message):
         migrations.get_current_version_from_comment(connection)
     cursor.fetchone.return_value = ['version']
-    with pytest.raises(migrations.DBException, message=message):
+    with pytest.raises(migrations.DBException, match=message):
         migrations.get_current_version_from_comment(connection)
     cursor.fetchone.return_value = ['version17.01']
-    with pytest.raises(migrations.DBException, message=message):
+    with pytest.raises(migrations.DBException, match=message):
         migrations.get_current_version_from_comment(connection)
 
     # correct comment

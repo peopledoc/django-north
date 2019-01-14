@@ -2,7 +2,11 @@
 
 COVERAGE_FLAGS="--cov=django_north --cov-report xml --cov-report term --cov-report html --cov-config .coveragerc"
 
-TESTS="tests/"
+if [ $# > 0 ]; then
+    TESTS=$*
+else
+    TESTS="tests/"
+fi
 
 if [ -z ${COVERAGE+x} ];
     then

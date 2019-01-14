@@ -20,7 +20,7 @@ class BookTestCase(TransactionTestCase):
     def test_delete_book(self):
         self.book1.delete()
 
-        self.assertEquals(self.author.book_set.count(), 1)
+        self.assertEqual(self.author.book_set.count(), 1)
 
     def test_permissions(self):
         # test that the correct fixtures where loaded:

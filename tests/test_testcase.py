@@ -16,4 +16,4 @@ class BookTestCase(TestCase):
             title="A Clash of Kings",
             pages=1235)
 
-        self.assertEquals(author.book_set.count(), 2)
+        self.assertEqual(author.book_set.count(), 2)

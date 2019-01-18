@@ -32,6 +32,9 @@ List of available settings:
 * ``NORTH_ADDITIONAL_SCHEMA_FILES``: list of sql files to load before the schema.
   For example: a file of DB roles, some extensions.
   Default value: ``[]``
+* ``NORTH_AFTER_SCHEMA_FILES``: list of sql files to load after the schema.
+  For example: a file of permissions, grants on tables
+  Default value: ``[]``
 * ``NORTH_CURRENT_VERSION_DETECTOR``: the current version detector.
   Default value: ``django_north.management.migrations.get_current_version_from_table``
 * ``NORTH_NON_TRANSACTIONAL_KEYWORDS``: list of keywords.

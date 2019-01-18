@@ -99,6 +99,17 @@ class Command(BaseCommand):
             .format(init_version))
         self.run_script(schema_path)
 
+        # load other set of additional files
+        after_files = getattr(
+            settings, 'NORTH_AFTER_SCHEMA_FILES', [])
+        for file_name in after_files:
+            file_path = os.path.join(
+                settings.NORTH_MIGRATIONS_ROOT, 'schemas', file_name)
+            if self.verbosity >= 1:
+                self.stdout.write(
+                    self.style.MIGRATE_LABEL("Load {}".format(file_name)))
+            self.run_script(file_path)
+
         # load fixtures
         try:
             fixtures_version = migrations.get_fixtures_for_init(init_version)

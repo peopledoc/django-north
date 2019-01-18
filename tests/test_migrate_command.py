@@ -134,11 +134,47 @@ def test_migrate_init_schema(capsys, settings, mocker):
     command = migrate.Command()
     command.verbosity = 2
 
+    # extensions, roles, fixtures, and grants
+    settings.NORTH_ADDITIONAL_SCHEMA_FILES = ['extension.sql', 'roles.sql']
+    settings.NORTH_AFTER_SCHEMA_FILES = ['grants.sql']
+    command.init_schema()
+    assert len(mock_run_script.call_args_list) == 5
+    assert mock_run_script.call_args_list[0] == mocker.call(
+        os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'schemas',
+                     'extension.sql'))
+    assert mock_run_script.call_args_list[1] == mocker.call(
+        os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'schemas',
+                     'roles.sql'))
+    assert mock_run_script.call_args_list[2] == mocker.call(
+        os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'schemas',
+                     'schema_16.12.sql'))
+    assert mock_run_script.call_args_list[3] == mocker.call(
+        os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'schemas',
+                     'grants.sql'))
+    assert mock_run_script.call_args_list[4] == mocker.call(
+        os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'fixtures',
+                     'fixtures_16.12.sql'))
+    captured = capsys.readouterr()
+    assert captured.out == (
+        'Load extension.sql\n'
+        'Load roles.sql\n'
+        'Load schema\n'
+        '  Applying 16.12...\n'
+        'Load grants.sql\n'
+        'Load fixtures\n'
+        '  Applying 16.12...\n'
+    )
+
+    mock_run_script.reset_mock()
+    command = migrate.Command()
+    command.verbosity = 2
+
     # no fixtures for this version
     mocker.patch(
         'django_north.management.migrations.get_version_for_init',
         return_value='17.3')
     del settings.NORTH_ADDITIONAL_SCHEMA_FILES
+    del settings.NORTH_AFTER_SCHEMA_FILES
     command.init_schema()
     assert len(mock_run_script.call_args_list) == 2
     assert mock_run_script.call_args_list[0] == mocker.call(

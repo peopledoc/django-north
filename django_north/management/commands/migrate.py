@@ -73,6 +73,16 @@ class Command(BaseCommand):
                     self.run_script(path)
                     recorder.record_applied(version, mig)
 
+    def _load_schema_file(self, file_name, load_name=None):
+        file_path = os.path.join(
+            settings.NORTH_MIGRATIONS_ROOT, 'schemas', file_name)
+        if self.verbosity >= 1:
+            if load_name is None:
+                load_name = file_name
+            self.stdout.write(
+                self.style.MIGRATE_LABEL("Load {}".format(load_name)))
+        self.run_script(file_path)
+
     def init_schema(self):
         init_version = migrations.get_version_for_init()
 
@@ -80,35 +90,22 @@ class Command(BaseCommand):
         additional_files = getattr(
             settings, 'NORTH_ADDITIONAL_SCHEMA_FILES', [])
         for file_name in additional_files:
-            file_path = os.path.join(
-                settings.NORTH_MIGRATIONS_ROOT, 'schemas', file_name)
-            if self.verbosity >= 1:
-                self.stdout.write(
-                    self.style.MIGRATE_LABEL("Load {}".format(file_name)))
-            self.run_script(file_path)
+            self._load_schema_file(file_name)
 
         # load schema
+        schema_file = getattr(
+            settings, 'NORTH_SCHEMA_TPL',
+            migrations.schema_default_tpl
+        ).format(init_version)
+        self._load_schema_file(schema_file, load_name="schema")
         if self.verbosity >= 1:
-            self.stdout.write(self.style.MIGRATE_LABEL("Load schema"))
             self.stdout.write("  Applying {}...".format(init_version))
-        schema_path = os.path.join(
-            settings.NORTH_MIGRATIONS_ROOT,
-            'schemas',
-            getattr(settings, 'NORTH_SCHEMA_TPL',
-                    migrations.schema_default_tpl)
-            .format(init_version))
-        self.run_script(schema_path)
 
         # load other set of additional files
         after_files = getattr(
             settings, 'NORTH_AFTER_SCHEMA_FILES', [])
         for file_name in after_files:
-            file_path = os.path.join(
-                settings.NORTH_MIGRATIONS_ROOT, 'schemas', file_name)
-            if self.verbosity >= 1:
-                self.stdout.write(
-                    self.style.MIGRATE_LABEL("Load {}".format(file_name)))
-            self.run_script(file_path)
+            self._load_schema_file(file_name)
 
         # load fixtures
         try:

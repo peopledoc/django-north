@@ -7,6 +7,7 @@ History
 ++++++++++++++++++
 
 - Add support for Django 2.1 & Python 3.7
+- Add setting `NORTH_AFTER_SCHEMA_FILES` for schema files after the main schema.
 
 0.2.4 (2018-09-12)
 ++++++++++++++++++

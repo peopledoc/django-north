@@ -29,7 +29,10 @@ List of available settings:
   To be used if you need to force the version used to init a new DB.
 * ``NORTH_SCHEMA_TPL``: default value ``schema_{}.sql``
 * ``NORTH_FIXTURES_TPL``: default value ``fixtures_{}.sql``
-* ``NORTH_ADDITIONAL_SCHEMA_FILES``: list of sql files to load before the schema.
+* ``NORTH_ADDITIONAL_SCHEMA_FILES``: **deprecated** list of sql files to load before the schema.
+  For example: a file of DB roles, some extensions.
+  Default value: ``[]``
+* ``NORTH_BEFORE_SCHEMA_FILES``: list of sql files to load before the schema.
   For example: a file of DB roles, some extensions.
   Default value: ``[]``
 * ``NORTH_AFTER_SCHEMA_FILES``: list of sql files to load after the schema.

@@ -2,6 +2,7 @@
 import io
 import logging
 import os.path
+import warnings
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -86,9 +87,18 @@ class Command(BaseCommand):
     def init_schema(self):
         init_version = migrations.get_version_for_init()
 
-        # load additional files
+        # load first set of additional files
+        after_files = getattr(
+            settings, 'NORTH_BEFORE_SCHEMA_FILES', [])
+        for file_name in after_files:
+            self._load_schema_file(file_name)
+
+        # load additional files (deprecated)
         additional_files = getattr(
             settings, 'NORTH_ADDITIONAL_SCHEMA_FILES', [])
+        if additional_files:
+            warnings.warn("NORTH_ADDITIONAL_SCHEMA_FILES will be deprecated. "
+                          "Use NORTH_BEFORE_SCHEMA_FILES instead.")
         for file_name in additional_files:
             self._load_schema_file(file_name)
 

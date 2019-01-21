@@ -88,9 +88,9 @@ class Command(BaseCommand):
         init_version = migrations.get_version_for_init()
 
         # load first set of additional files
-        after_files = getattr(
+        before_files = getattr(
             settings, 'NORTH_BEFORE_SCHEMA_FILES', [])
-        for file_name in after_files:
+        for file_name in before_files:
             self._load_schema_file(file_name)
 
         # load additional files (deprecated)

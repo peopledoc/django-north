@@ -1,4 +1,5 @@
 import os.path
+import warnings
 
 from django.core.management import call_command
 from django.db import connection
@@ -42,7 +43,7 @@ def test_migrate_run_script(settings, mocker):
     assert len(mock_run.call_args_list) == 1
 
 
-def test_migrate_init_schema(capsys, settings, mocker):
+def test_migrate_init_schema_fixture(capsys, settings, mocker):
     root = os.path.dirname(__file__)
     settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'test_data/sql')
 
@@ -58,6 +59,10 @@ def test_migrate_init_schema(capsys, settings, mocker):
     # no additional files
     if hasattr(settings, 'NORTH_ADDITIONAL_SCHEMA_FILES'):
         del settings.NORTH_ADDITIONAL_SCHEMA_FILES
+    if hasattr(settings, 'NORTH_BEFORE_SCHEMA_FILES'):
+        del settings.NORTH_BEFORE_SCHEMA_FILES
+    if hasattr(settings, 'NORTH_AFTER_SCHEMA_FILES'):
+        del settings.NORTH_AFTER_SCHEMA_FILES
     command.init_schema()
     assert len(mock_run_script.call_args_list) == 2
     assert mock_run_script.call_args_list[0] == mocker.call(
@@ -74,12 +79,23 @@ def test_migrate_init_schema(capsys, settings, mocker):
         '  Applying 16.12...\n'
     )
 
-    mock_run_script.reset_mock()
+
+def test_migrate_init_extension_schema_fixture(capsys, settings, mocker):
+    root = os.path.dirname(__file__)
+    settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'test_data/sql')
+
+    mocker.patch(
+        'django_north.management.migrations.get_version_for_init',
+        return_value='16.12')
+    mock_run_script = mocker.patch(
+        'django_north.management.commands.migrate.Command.run_script')
     command = migrate.Command()
     command.verbosity = 2
 
     # extensions & fixtures
-    settings.NORTH_ADDITIONAL_SCHEMA_FILES = ['extension.sql']
+    settings.NORTH_BEFORE_SCHEMA_FILES = ['extension.sql']
+    settings.NORTH_ADDITIONAL_SCHEMA_FILES = []
+    settings.NORTH_AFTER_SCHEMA_FILES = []
     command.init_schema()
     assert len(mock_run_script.call_args_list) == 3
     assert mock_run_script.call_args_list[0] == mocker.call(
@@ -100,12 +116,23 @@ def test_migrate_init_schema(capsys, settings, mocker):
         '  Applying 16.12...\n'
     )
 
-    mock_run_script.reset_mock()
+
+def test_migrate_init_extension_roles_schema_fixture(capsys, settings, mocker):
+    root = os.path.dirname(__file__)
+    settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'test_data/sql')
+
+    mocker.patch(
+        'django_north.management.migrations.get_version_for_init',
+        return_value='16.12')
+    mock_run_script = mocker.patch(
+        'django_north.management.commands.migrate.Command.run_script')
     command = migrate.Command()
     command.verbosity = 2
 
     # extensions, roles & fixtures
-    settings.NORTH_ADDITIONAL_SCHEMA_FILES = ['extension.sql', 'roles.sql']
+    settings.NORTH_BEFORE_SCHEMA_FILES = ['extension.sql', 'roles.sql']
+    settings.NORTH_AFTER_SCHEMA_FILES = []
+    settings.NORTH_ADDITIONAL_SCHEMA_FILES = []
     command.init_schema()
     assert len(mock_run_script.call_args_list) == 4
     assert mock_run_script.call_args_list[0] == mocker.call(
@@ -130,15 +157,113 @@ def test_migrate_init_schema(capsys, settings, mocker):
         '  Applying 16.12...\n'
     )
 
-    mock_run_script.reset_mock()
+
+def test_migrate_init_full(capsys, settings, mocker):
+    root = os.path.dirname(__file__)
+    settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'test_data/sql')
+
+    mocker.patch(
+        'django_north.management.migrations.get_version_for_init',
+        return_value='16.12')
+    mock_run_script = mocker.patch(
+        'django_north.management.commands.migrate.Command.run_script')
     command = migrate.Command()
     command.verbosity = 2
+
+    # extensions, roles, fixtures, and grants
+    settings.NORTH_BEFORE_SCHEMA_FILES = ['extension.sql', 'roles.sql']
+    settings.NORTH_AFTER_SCHEMA_FILES = ['grants.sql']
+    settings.NORTH_ADDITIONAL_SCHEMA_FILES = []
+    command.init_schema()
+    assert len(mock_run_script.call_args_list) == 5
+    assert mock_run_script.call_args_list[0] == mocker.call(
+        os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'schemas',
+                     'extension.sql'))
+    assert mock_run_script.call_args_list[1] == mocker.call(
+        os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'schemas',
+                     'roles.sql'))
+    assert mock_run_script.call_args_list[2] == mocker.call(
+        os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'schemas',
+                     'schema_16.12.sql'))
+    assert mock_run_script.call_args_list[3] == mocker.call(
+        os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'schemas',
+                     'grants.sql'))
+    assert mock_run_script.call_args_list[4] == mocker.call(
+        os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'fixtures',
+                     'fixtures_16.12.sql'))
+    captured = capsys.readouterr()
+    assert captured.out == (
+        'Load extension.sql\n'
+        'Load roles.sql\n'
+        'Load schema\n'
+        '  Applying 16.12...\n'
+        'Load grants.sql\n'
+        'Load fixtures\n'
+        '  Applying 16.12...\n'
+    )
+
+
+def test_migrate_init_deprecation(capsys, settings, mocker):
+    root = os.path.dirname(__file__)
+    settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'test_data/sql')
+
+    mocker.patch(
+        'django_north.management.migrations.get_version_for_init',
+        return_value='16.12')
+    mock_run_script = mocker.patch(
+        'django_north.management.commands.migrate.Command.run_script')
+    command = migrate.Command()
+    command.verbosity = 2
+
+    # deprecating warning
+    settings.NORTH_ADDITIONAL_SCHEMA_FILES = ['extension.sql', 'roles.sql']
+    settings.NORTH_BEFORE_SCHEMA_FILES = []
+    settings.NORTH_AFTER_SCHEMA_FILES = []
+    with warnings.catch_warnings(record=True) as warns:
+        command.init_schema()
+        assert len(warns) == 1
+        assert "NORTH_BEFORE_SCHEMA_FILES" in str(warns[0].message)
+
+    assert len(mock_run_script.call_args_list) == 4
+    assert mock_run_script.call_args_list[0] == mocker.call(
+        os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'schemas',
+                     'extension.sql'))
+    assert mock_run_script.call_args_list[1] == mocker.call(
+        os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'schemas',
+                     'roles.sql'))
+    assert mock_run_script.call_args_list[2] == mocker.call(
+        os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'schemas',
+                     'schema_16.12.sql'))
+    assert mock_run_script.call_args_list[3] == mocker.call(
+        os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'fixtures',
+                     'fixtures_16.12.sql'))
+    captured = capsys.readouterr()
+    assert captured.out == (
+        'Load extension.sql\n'
+        'Load roles.sql\n'
+        'Load schema\n'
+        '  Applying 16.12...\n'
+        'Load fixtures\n'
+        '  Applying 16.12...\n'
+    )
+
+
+def test_migrate_init_previous_fixture(capsys, settings, mocker):
+    root = os.path.dirname(__file__)
+    settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'test_data/sql')
 
     # no fixtures for this version
     mocker.patch(
         'django_north.management.migrations.get_version_for_init',
         return_value='17.3')
-    del settings.NORTH_ADDITIONAL_SCHEMA_FILES
+    mock_run_script = mocker.patch(
+        'django_north.management.commands.migrate.Command.run_script')
+    command = migrate.Command()
+    command.verbosity = 2
+
+    settings.NORTH_BEFORE_SCHEMA_FILES = []
+    settings.NORTH_AFTER_SCHEMA_FILES = []
+    settings.NORTH_ADDITIONAL_SCHEMA_FILES = []
     command.init_schema()
     assert len(mock_run_script.call_args_list) == 2
     assert mock_run_script.call_args_list[0] == mocker.call(
@@ -152,15 +277,23 @@ def test_migrate_init_schema(capsys, settings, mocker):
         '  Applying 16.12...\n'
     )
 
-    mock_run_script.reset_mock()
-    command = migrate.Command()
-    command.verbosity = 2
+
+def test_migrate_init_no_fixture(capsys, settings, mocker):
+    root = os.path.dirname(__file__)
+    settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'test_data/sql')
 
     # no fixtures
     mocker.patch(
         'django_north.management.migrations.get_version_for_init',
         return_value='16.11')
-    del settings.NORTH_ADDITIONAL_SCHEMA_FILES
+    mock_run_script = mocker.patch(
+        'django_north.management.commands.migrate.Command.run_script')
+    command = migrate.Command()
+    command.verbosity = 2
+
+    settings.NORTH_BEFORE_SCHEMA_FILES = []
+    settings.NORTH_AFTER_SCHEMA_FILES = []
+    settings.NORTH_ADDITIONAL_SCHEMA_FILES = []
     command.init_schema()
     assert len(mock_run_script.call_args_list) == 1
     assert mock_run_script.call_args_list[0] == mocker.call(

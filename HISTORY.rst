@@ -3,7 +3,7 @@
 History
 -------
 
-0.2.5 (unreleased)
+0.2.5 (2019-01-22)
 ++++++++++++++++++
 
 - Add support for Django 2.1 & Python 3.7

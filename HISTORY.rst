@@ -6,7 +6,7 @@ History
 0.2.6 (unreleased)
 ++++++++++++++++++
 
-- Nothing changed yet.
+- Add support for Django 2.2
 
 
 0.2.5 (2019-01-22)

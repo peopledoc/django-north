@@ -203,6 +203,158 @@ def test_migrate_init_full(capsys, settings, mocker):
     )
 
 
+def test_migrate_before_schema_glob(capsys, settings, mocker):
+    root = os.path.dirname(__file__)
+    settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'test_data/sql')
+
+    mocker.patch(
+        'django_north.management.migrations.get_version_for_init',
+        return_value='16.12')
+    mock_run_script = mocker.patch(
+        'django_north.management.commands.migrate.Command.run_script')
+    command = migrate.Command()
+    command.verbosity = 2
+
+    # extensions, roles, fixtures, and grants
+    settings.NORTH_BEFORE_SCHEMA_FILES = ['glob_*.sql']
+    settings.NORTH_AFTER_SCHEMA_FILES = []
+    settings.NORTH_ADDITIONAL_SCHEMA_FILES = []
+    command.init_schema()
+    assert len(mock_run_script.call_args_list) == 5
+
+    base_path = os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'schemas')
+    assert mock_run_script.call_args_list[0] == mocker.call(
+        os.path.join(base_path, 'glob_00.sql'))
+    assert mock_run_script.call_args_list[1] == mocker.call(
+        os.path.join(base_path, 'glob_01.sql'))
+    assert mock_run_script.call_args_list[2] == mocker.call(
+        os.path.join(base_path, 'glob_02.sql'))
+    captured = capsys.readouterr()
+    assert captured.out == (
+        'Load glob_00.sql\n'
+        'Load glob_01.sql\n'
+        'Load glob_02.sql\n'
+        'Load schema\n'
+        '  Applying 16.12...\n'
+        'Load fixtures\n'
+        '  Applying 16.12...\n'
+    )
+
+
+def test_migrate_after_schema_glob(capsys, settings, mocker):
+    root = os.path.dirname(__file__)
+    settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'test_data/sql')
+
+    mocker.patch(
+        'django_north.management.migrations.get_version_for_init',
+        return_value='16.12')
+    mock_run_script = mocker.patch(
+        'django_north.management.commands.migrate.Command.run_script')
+    command = migrate.Command()
+    command.verbosity = 2
+
+    # extensions, roles, fixtures, and grants
+    settings.NORTH_BEFORE_SCHEMA_FILES = []
+    settings.NORTH_AFTER_SCHEMA_FILES = ['glob_*.sql']
+    settings.NORTH_ADDITIONAL_SCHEMA_FILES = []
+    command.init_schema()
+    assert len(mock_run_script.call_args_list) == 5
+
+    base_path = os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'schemas')
+    assert mock_run_script.call_args_list[1] == mocker.call(
+        os.path.join(base_path, 'glob_00.sql'))
+    assert mock_run_script.call_args_list[2] == mocker.call(
+        os.path.join(base_path, 'glob_01.sql'))
+    assert mock_run_script.call_args_list[3] == mocker.call(
+        os.path.join(base_path, 'glob_02.sql'))
+    captured = capsys.readouterr()
+    assert captured.out == (
+        'Load schema\n'
+        '  Applying 16.12...\n'
+        'Load glob_00.sql\n'
+        'Load glob_01.sql\n'
+        'Load glob_02.sql\n'
+        'Load fixtures\n'
+        '  Applying 16.12...\n'
+    )
+
+
+def test_migrate_before_schema_dir(capsys, settings, mocker):
+    root = os.path.dirname(__file__)
+    settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'test_data/sql')
+
+    mocker.patch(
+        'django_north.management.migrations.get_version_for_init',
+        return_value='16.12')
+    mock_run_script = mocker.patch(
+        'django_north.management.commands.migrate.Command.run_script')
+    command = migrate.Command()
+    command.verbosity = 2
+
+    # extensions, roles, fixtures, and grants
+    settings.NORTH_BEFORE_SCHEMA_FILES = ['dir']
+    settings.NORTH_AFTER_SCHEMA_FILES = []
+    settings.NORTH_ADDITIONAL_SCHEMA_FILES = []
+    command.init_schema()
+    assert len(mock_run_script.call_args_list) == 5
+
+    base_path = os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'schemas', 'dir')
+    assert mock_run_script.call_args_list[0] == mocker.call(
+        os.path.join(base_path, 'file_00.sql'))
+    assert mock_run_script.call_args_list[1] == mocker.call(
+        os.path.join(base_path, 'file_01.sql'))
+    assert mock_run_script.call_args_list[2] == mocker.call(
+        os.path.join(base_path, 'file_02.sql'))
+    captured = capsys.readouterr()
+    assert captured.out == (
+        'Load dir/file_00.sql\n'
+        'Load dir/file_01.sql\n'
+        'Load dir/file_02.sql\n'
+        'Load schema\n'
+        '  Applying 16.12...\n'
+        'Load fixtures\n'
+        '  Applying 16.12...\n'
+    )
+
+
+def test_migrate_after_schema_dir(capsys, settings, mocker):
+    root = os.path.dirname(__file__)
+    settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'test_data/sql')
+
+    mocker.patch(
+        'django_north.management.migrations.get_version_for_init',
+        return_value='16.12')
+    mock_run_script = mocker.patch(
+        'django_north.management.commands.migrate.Command.run_script')
+    command = migrate.Command()
+    command.verbosity = 2
+
+    # extensions, roles, fixtures, and grants
+    settings.NORTH_BEFORE_SCHEMA_FILES = []
+    settings.NORTH_AFTER_SCHEMA_FILES = ['dir']
+    settings.NORTH_ADDITIONAL_SCHEMA_FILES = []
+    command.init_schema()
+    assert len(mock_run_script.call_args_list) == 5
+
+    base_path = os.path.join(settings.NORTH_MIGRATIONS_ROOT, 'schemas', 'dir')
+    assert mock_run_script.call_args_list[1] == mocker.call(
+        os.path.join(base_path, 'file_00.sql'))
+    assert mock_run_script.call_args_list[2] == mocker.call(
+        os.path.join(base_path, 'file_01.sql'))
+    assert mock_run_script.call_args_list[3] == mocker.call(
+        os.path.join(base_path, 'file_02.sql'))
+    captured = capsys.readouterr()
+    assert captured.out == (
+        'Load schema\n'
+        '  Applying 16.12...\n'
+        'Load dir/file_00.sql\n'
+        'Load dir/file_01.sql\n'
+        'Load dir/file_02.sql\n'
+        'Load fixtures\n'
+        '  Applying 16.12...\n'
+    )
+
+
 def test_migrate_init_deprecation(capsys, settings, mocker):
     root = os.path.dirname(__file__)
     settings.NORTH_MIGRATIONS_ROOT = os.path.join(root, 'test_data/sql')

@@ -82,8 +82,6 @@ class Command(BaseCommand):
 
     def _load_schema_path(self, file_path, load_name):
         if self.verbosity >= 1:
-            if load_name is None:
-                load_name = load_name
             self.stdout.write(
                 self.style.MIGRATE_LABEL("Load {}".format(load_name)))
         self.run_script(file_path)

@@ -92,21 +92,21 @@ class Command(BaseCommand):
         load_name = os.path.relpath(file_path, migration_root)
         self._load_schema_file(file_path, load_name)
 
+    def _load_schema_dir(self, dir_path):
+        for file_name in sorted(os.listdir(dir_path)):
+            file_path = os.path.join(dir_path, file_name)
+            if os.path.isfile(file_path) and file_path.endswith('.sql'):
+                self._load_schema_fullpath_file(file_path)
+
     def _load_schema_string(self, input_string):
         path = os.path.join(
             settings.NORTH_MIGRATIONS_ROOT, 'schemas', input_string)
 
-        if os.path.isdir(path):
-            for file_name in sorted(os.listdir(path)):
-                file_path = os.path.join(path, file_name)
-                if os.path.isfile(file_path) and file_path.endswith('.sql'):
-                    self._load_schema_fullpath_file(file_path)
-        elif os.path.isfile(path):
-            self._load_schema_fullpath_file(path)
-        else:
-            for file_path in sorted(glob.glob(path)):
-                if os.path.isfile(file_path) and file_path.endswith('.sql'):
-                    self._load_schema_fullpath_file(file_path)
+        for file_path in sorted(glob.glob(path)):
+            if os.path.isdir(file_path):
+                self._load_schema_dir(file_path)
+            if os.path.isfile(file_path):
+                self._load_schema_fullpath_file(file_path)
 
     def init_schema(self):
         init_version = migrations.get_version_for_init()

@@ -3,10 +3,11 @@
 History
 -------
 
-0.2.6 (unreleased)
+0.2.6 (2019-10-25)
 ++++++++++++++++++
 
 - Add support for Django 2.2
+- `NORTH_AFTER_SCHEMA_FILES` and `NORTH_BEFORE_SCHEMA_FILES` can now accept glob string.
 
 
 0.2.5 (2019-01-22)

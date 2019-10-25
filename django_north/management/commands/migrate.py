@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import glob
 import io
 import logging
 import os.path
@@ -77,12 +78,35 @@ class Command(BaseCommand):
     def _load_schema_file(self, file_name, load_name=None):
         file_path = os.path.join(
             settings.NORTH_MIGRATIONS_ROOT, 'schemas', file_name)
+        self._load_schema_path(file_path, load_name or file_name)
+
+    def _load_schema_path(self, file_path, load_name):
         if self.verbosity >= 1:
-            if load_name is None:
-                load_name = file_name
             self.stdout.write(
                 self.style.MIGRATE_LABEL("Load {}".format(load_name)))
         self.run_script(file_path)
+
+    def _load_schema_fullpath_file(self, file_path):
+        migration_root = os.path.join(
+            settings.NORTH_MIGRATIONS_ROOT, 'schemas')
+        load_name = os.path.relpath(file_path, migration_root)
+        self._load_schema_file(file_path, load_name)
+
+    def _load_schema_dir(self, dir_path):
+        for file_name in sorted(os.listdir(dir_path)):
+            file_path = os.path.join(dir_path, file_name)
+            if os.path.isfile(file_path) and file_path.endswith('.sql'):
+                self._load_schema_fullpath_file(file_path)
+
+    def _load_schema_string(self, input_string):
+        path = os.path.join(
+            settings.NORTH_MIGRATIONS_ROOT, 'schemas', input_string)
+
+        for file_path in sorted(glob.glob(path)):
+            if os.path.isdir(file_path):
+                self._load_schema_dir(file_path)
+            if os.path.isfile(file_path):
+                self._load_schema_fullpath_file(file_path)
 
     def init_schema(self):
         init_version = migrations.get_version_for_init()
@@ -91,7 +115,7 @@ class Command(BaseCommand):
         before_files = getattr(
             settings, 'NORTH_BEFORE_SCHEMA_FILES', [])
         for file_name in before_files:
-            self._load_schema_file(file_name)
+            self._load_schema_string(file_name)
 
         # load additional files (deprecated)
         additional_files = getattr(
@@ -115,7 +139,7 @@ class Command(BaseCommand):
         after_files = getattr(
             settings, 'NORTH_AFTER_SCHEMA_FILES', [])
         for file_name in after_files:
-            self._load_schema_file(file_name)
+            self._load_schema_string(file_name)
 
         # load fixtures
         try:

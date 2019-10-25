@@ -32,10 +32,12 @@ List of available settings:
 * ``NORTH_ADDITIONAL_SCHEMA_FILES``: **deprecated** list of sql files to load before the schema.
   For example: a file of DB roles, some extensions.
   Default value: ``[]``
-* ``NORTH_BEFORE_SCHEMA_FILES``: list of sql files to load before the schema.
+* ``NORTH_BEFORE_SCHEMA_FILES``: list of sql files, dirs and globs to load before the schema.
+  If it's a dir or a glob, load only sql files in alphabetical order.
   For example: a file of DB roles, some extensions.
   Default value: ``[]``
-* ``NORTH_AFTER_SCHEMA_FILES``: list of sql files to load after the schema.
+* ``NORTH_AFTER_SCHEMA_FILES``: list of sql files, dirs and globs to load after the schema.
+  If it's a dir or a glob, load only sql files in alphabetical order.
   For example: a file of permissions, grants on tables
   Default value: ``[]``
 * ``NORTH_CURRENT_VERSION_DETECTOR``: the current version detector.

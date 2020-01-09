@@ -14,7 +14,7 @@ Django North
 .. image:: https://img.shields.io/codecov/c/github/peopledoc/django-north/master.svg
     :target: https://codecov.io/github/peopledoc/django-north?branch=master
 
-Yet another way to manage migrations: DBA as a service.
+Django library for managing and executing hand-written PostgreSQL migrations.
 
 Let your favorite DBAs define the database schema, and provide blue/green
 migration files. Drop django native migrations, and use DBA's migrations

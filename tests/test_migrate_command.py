@@ -10,39 +10,48 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from django_north.management import migrations
 
 
+def test_migrate_command_override(mocker):
+    mock_django_handle = mocker.patch(
+        'django.core.management.commands.migrate.Command.handle')
+    mock_sept_migrate = mocker.patch('septentrion.migrate')
+
+    call_command('migrate')
+
+    assert mock_django_handle.called is False
+    assert mock_sept_migrate.called is True
+
+
 @pytest.mark.parametrize("manage", [True, False, None])
-def test_migrate(mocker, settings, manage):
+def test_migrate_if_needed(mocker, settings, manage):
     if manage is not None:
         settings.NORTH_MANAGE_DB = manage
     if manage is None and hasattr(settings, 'NORTH_MANAGE_DB'):
         del settings.NORTH_MANAGE_DB
 
-    mock_handle = mocker.patch(
-        'django.core.management.commands.migrate.Command.handle')
     mock_migrate = mocker.patch(
-        'django_north.management.commands.migrate.Command.migrate')
+        'septentrion.migrate')
 
     call_command('migrate')
 
-    assert mock_handle.called is False
     assert mock_migrate.called == bool(manage)
 
 
-def test_migrate_database(capsys, mocker):
-    mock_build = mocker.patch(
-        'django_north.management.migrations.build_migration_plan')
+def test_migrate_select_database(settings, mocker):
+    mock_migrate = mocker.patch('septentrion.migrate')
 
     call_command('migrate')
-    assert mock_build.called_once()
-    connection = mock_build.call_args[0][0]
-    assert connection.alias == DEFAULT_DB_ALIAS
+    assert mock_migrate.called_once()
 
-    mock_build.reset_mock()
+    dbname = mock_migrate.call_args[1]['DBNAME']
+    assert dbname == settings.DATABASES[DEFAULT_DB_ALIAS]['NAME']
+
+    mock_migrate.reset_mock()
 
     call_command('migrate', '--database', 'foo')
-    assert mock_build.called_once()
-    connection = mock_build.call_args[0][0]
-    assert connection.alias == 'foo'
+    assert mock_migrate.called_once()
+
+    dbname = mock_migrate.call_args[1]['DBNAME']
+    assert dbname == settings.DATABASES['foo']['NAME']
 
 
 def run_sql(sql):

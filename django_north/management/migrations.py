@@ -1,4 +1,3 @@
-import io
 import os
 from distutils.version import StrictVersion
 from importlib import import_module
@@ -256,23 +255,6 @@ def get_closest_version(target_version, sql_tpl, force_version=None):
     return None
 
 
-def get_version_for_init():
-    """
-    Get the version to use to init a new DB to the current target version.
-    """
-    version = get_closest_version(
-        settings.NORTH_TARGET_VERSION,
-        os.path.join(
-            settings.NORTH_MIGRATIONS_ROOT,
-            'schemas',
-            getattr(settings, 'NORTH_SCHEMA_TPL', schema_default_tpl)),
-        force_version=getattr(settings, 'NORTH_SCHEMA_VERSION', None))
-
-    if version is None:
-        raise DBException('Can not find a schema to init the DB.')
-    return version
-
-
 def get_fixtures_for_init(target_version):
     """
     Get the closest fixtures to use to init a new DB
@@ -304,75 +286,3 @@ def is_manual_migration(file_handler):
 
     file_handler.seek(0)
     return False
-
-
-def build_migration_plan(connection):
-    """
-    Return the list of migrations by version,
-    from the version used to init the DB to the current target version.
-    """
-    # get current version
-    current_version = get_current_version(connection)
-    if current_version is None:
-        # schema not inited
-        return None
-    # get known versions
-    known_versions = get_known_versions()
-    # get applied versions
-    applied_versions = get_applied_versions(connection)
-
-    migration_plan = {
-        'current_version': current_version,
-        'init_version': None,
-        'plans': [],
-    }
-
-    # guess the version used to init the DB
-    if not applied_versions:
-        # current version is not None, it was used to init the DB
-        try:
-            first_version_index = known_versions.index(current_version) + 1
-        except ValueError:
-            raise DBException(
-                'The current version of the database is unknown: {}.'
-                .format(current_version))
-        init_version = current_version
-    else:
-        first_version_index = known_versions.index(applied_versions[0])
-        init_version = known_versions[first_version_index - 1]
-    migration_plan['init_version'] = init_version
-
-    # get all versions to apply
-    try:
-        target_version_index = known_versions.index(
-            settings.NORTH_TARGET_VERSION)
-    except ValueError:
-        raise ImproperlyConfigured(
-            'settings.NORTH_TARGET_VERSION is improperly configured: '
-            'version {} not found.'.format(
-                settings.NORTH_TARGET_VERSION))
-    versions_to_apply = known_versions[
-        first_version_index:target_version_index + 1]
-
-    # get plan for each version to apply
-    for version in versions_to_apply:
-        version_plan = []
-        # get applied migrations
-        applied_migrations = get_applied_migrations(version, connection)
-        # get migrations to apply
-        migrations_to_apply = get_migrations_to_apply(version)
-        migs = list(migrations_to_apply.keys())
-        migs.sort()
-        # build plan
-        for mig in migs:
-            applied = mig in applied_migrations
-            path = migrations_to_apply[mig]
-            with io.open(path, 'r', encoding='utf8') as f:
-                is_manual = is_manual_migration(f)
-            version_plan.append((mig, applied, path, is_manual))
-        migration_plan['plans'].append({
-            'version': version,
-            'plan': version_plan
-        })
-
-    return migration_plan

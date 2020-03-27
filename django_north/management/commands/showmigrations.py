@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
 
+import septentrion
+
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import connections
@@ -27,8 +29,21 @@ class Command(BaseCommand):
             logger.info('showmigrations command disabled')
             return
 
-        self.connection = connections[options['database']]
-        return self.show_list()
+        connection = connections[options['database']]
+
+        septentrion.show_migrations(
+            **{
+                "MIGRATIONS_ROOT": settings.NORTH_MIGRATIONS_ROOT,
+                "target_version": settings.NORTH_TARGET_VERSION,
+                "SCHEMA_TEMPLATE": getattr(settings, "NORTH_SCHEMA_TPL", migrations.schema_default_tpl),
+                "DBNAME": connection.settings_dict["NAME"],
+                "HOST": connection.settings_dict["HOST"],
+                "USERNAME": connection.settings_dict["USER"],
+                "PASSWORD": connection.settings_dict["PASSWORD"],
+            },
+        )
+
+
 
     def show_list(self):
         """

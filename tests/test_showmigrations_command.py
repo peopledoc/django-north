@@ -24,7 +24,7 @@ def test_migrate(mocker, settings, manage):
 
 def test_showmigrations(capsys, mocker):
     mock_plan = mocker.patch(
-        'django_north.management.migrations.build_migration_plan')
+        'septentrion.core.build_migration_plan')
 
     # schema not inited
     mock_plan.return_value = None

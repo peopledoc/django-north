@@ -35,49 +35,13 @@ class Command(BaseCommand):
             **{
                 "MIGRATIONS_ROOT": settings.NORTH_MIGRATIONS_ROOT,
                 "target_version": settings.NORTH_TARGET_VERSION,
-                "SCHEMA_TEMPLATE": getattr(settings, "NORTH_SCHEMA_TPL", migrations.schema_default_tpl),
+                "SCHEMA_TEMPLATE": getattr(
+                    settings,
+                    "NORTH_SCHEMA_TPL",
+                    migrations.schema_default_tpl),
                 "DBNAME": connection.settings_dict["NAME"],
                 "HOST": connection.settings_dict["HOST"],
                 "USERNAME": connection.settings_dict["USER"],
                 "PASSWORD": connection.settings_dict["PASSWORD"],
             },
         )
-
-
-
-    def show_list(self):
-        """
-        Shows a list of all migrations on the system,
-        from the version used to init the DB, to the current target version.
-        """
-        migration_plan = migrations.build_migration_plan(self.connection)
-        if migration_plan is None:
-            self.stdout.write(self.style.ERROR("Schema not inited"))
-            return
-
-        self.stdout.write(
-            self.style.MIGRATE_HEADING("Current version of the DB:"))
-        self.stdout.write(
-            self.style.MIGRATE_LABEL(
-                "  {}".format(migration_plan['current_version'])))
-
-        self.stdout.write(
-            self.style.MIGRATE_HEADING("Schema used to init the DB:"))
-        self.stdout.write(
-            self.style.MIGRATE_LABEL(
-                "  {}".format(migration_plan['init_version'])))
-
-        # display migration status for each version to apply
-        for plan in migration_plan['plans']:
-            self.stdout.write(self.style.MIGRATE_HEADING("Version:"))
-            self.stdout.write(
-                self.style.MIGRATE_LABEL("  {}".format(plan['version'])))
-            # print plan
-            for mig, applied, path, is_manual in plan['plan']:
-                title = mig
-                if is_manual:
-                    title += ' (manual)'
-                if applied:
-                    self.stdout.write("  [X] %s" % title)
-                else:
-                    self.stdout.write("  [ ] %s" % title)

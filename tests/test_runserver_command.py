@@ -2,9 +2,12 @@ from django_north.management import migrations
 from django_north.management.commands import runserver
 
 
-def test_runserver_check_migrations(capsys, mocker):
+def test_runserver_check_migrations(
+        capsys,
+        mocker,
+):
     mock_plan = mocker.patch(
-        'django_north.management.migrations.build_migration_plan')
+        'septentrion.core.build_migration_plan')
 
     # DBException raised
     command = runserver.Command()
@@ -14,6 +17,8 @@ def test_runserver_check_migrations(capsys, mocker):
     assert captured.out == '\nSomething...\n'
 
     # schema not inited
+    mocker.patch(
+        'septentrion.is_schema_initialized', return_value=False)
     command = runserver.Command()
     mock_plan.side_effect = None
     mock_plan.return_value = None
@@ -23,26 +28,25 @@ def test_runserver_check_migrations(capsys, mocker):
 
     # schema inited, missing migrations
     command = runserver.Command()
-    mock_plan.return_value = {
-        'current_version': 'v2',
-        'init_version': 'v1',
-        'plans': [
-            {
-                'version': 'v3',
-                'plan': [
-                    ('a-ddl.sql', True, '/somewhere/a-ddl.sql', False),
-                    ('b-ddl.sql', False, '/somewhere/manual/b-ddl.sql', True),
-                ]
-            },
-            {
-                'version': 'v4',
-                'plan': [
-                    ('a-ddl.sql', False, '/somewhere/a-ddl.sql', False),
-                ]
-            }
-        ],
-    }
-    command.check_migrations()
+    mocker.patch(
+        'septentrion.is_schema_initialized', return_value=True)
+    mock_plan.return_value = [
+        {
+            'version': 'v3',
+            'plan': [
+                ('a-ddl.sql', True, '/somewhere/a-ddl.sql', False),
+                ('b-ddl.sql', False, '/somewhere/manual/b-ddl.sql', True),
+            ]
+        },
+        {
+            'version': 'v4',
+            'plan': [
+                ('a-ddl.sql', False, '/somewhere/a-ddl.sql', False),
+            ]
+        }
+    ]
+    with capsys.disabled():
+        command.check_migrations()
     captured = capsys.readouterr()
     assert captured.out == (
         "\nYou have unapplied migrations; "
@@ -52,25 +56,21 @@ def test_runserver_check_migrations(capsys, mocker):
 
     # schema inited, no missing migrations
     command = runserver.Command()
-    mock_plan.return_value = {
-        'current_version': 'v2',
-        'init_version': 'v1',
-        'plans': [
-            {
-                'version': 'v3',
-                'plan': [
-                    ('a-ddl.sql', True, '/somewhere/a-ddl.sql', False),
-                    ('b-ddl.sql', True, '/somewhere/manual/b-ddl.sql', True),
-                ]
-            },
-            {
-                'version': 'v4',
-                'plan': [
-                    ('a-ddl.sql', True, '/somewhere/a-ddl.sql', False),
-                ]
-            }
-        ],
-    }
+    mock_plan.return_value = [
+        {
+            'version': 'v3',
+            'plan': [
+                ('a-ddl.sql', True, '/somewhere/a-ddl.sql', False),
+                ('b-ddl.sql', True, '/somewhere/manual/b-ddl.sql', True),
+            ]
+        },
+        {
+            'version': 'v4',
+            'plan': [
+                ('a-ddl.sql', True, '/somewhere/a-ddl.sql', False),
+            ]
+        }
+    ]
     command.check_migrations()
     captured = capsys.readouterr()
     assert captured.out == ''

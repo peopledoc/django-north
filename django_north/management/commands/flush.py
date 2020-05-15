@@ -1,8 +1,6 @@
 from __future__ import unicode_literals
 
-import io
 import logging
-import os
 import sys
 import septentrion
 
@@ -25,7 +23,6 @@ from django.utils.six.moves import input
 
 from django_north.management.migrations import get_current_version
 from django_north.management.migrations import fixtures_default_tpl
-from django_north.management.runner import Script
 
 logger = logging.getLogger(__name__)
 

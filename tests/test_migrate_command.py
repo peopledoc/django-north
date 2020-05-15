@@ -98,6 +98,7 @@ def test_migrate_command_for_real(django_db_setup_no_init, settings):
     call_command('migrate', '--database', 'no_init')
 
     assert migrations.get_current_version(connections['no_init']) is not None
+
     # check if max applied version is target version
     assert (migrations.get_applied_versions(connections['no_init'])[-1] ==
             settings.NORTH_TARGET_VERSION)

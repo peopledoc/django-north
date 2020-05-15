@@ -4,6 +4,8 @@ import io
 import logging
 import os
 import sys
+import septentrion
+
 from importlib import import_module
 
 from django.apps import apps
@@ -22,7 +24,6 @@ from django.utils import six
 from django.utils.six.moves import input
 
 from django_north.management.migrations import get_current_version
-from django_north.management.migrations import get_fixtures_for_init
 from django_north.management.migrations import fixtures_default_tpl
 from django_north.management.runner import Script
 
@@ -192,12 +193,18 @@ Are you sure you want to do this?
 
         # reload fixtures
         connection = connections[database]
-        fixtures_version = get_fixtures_for_init(current_version)
-        fixtures_path = os.path.join(
-            settings.NORTH_MIGRATIONS_ROOT,
-            'fixtures',
-            getattr(settings, 'NORTH_FIXTURES_TPL', fixtures_default_tpl)
-            .format(fixtures_version))
-        with io.open(fixtures_path, 'r', encoding='utf8') as f:
-            script = Script(f)
-            script.run(connection)
+        septentrion.load_fixtures(
+            current_version,
+            **{
+                "MIGRATIONS_ROOT": settings.NORTH_MIGRATIONS_ROOT,
+                "FIXTURES_TEMPLATE": getattr(
+                    settings,
+                    "NORTH_FIXTURES_TPL",
+                    fixtures_default_tpl),
+                "DBNAME": connection.settings_dict["NAME"],
+                "HOST": connection.settings_dict["HOST"],
+                "USERNAME": connection.settings_dict["USER"],
+                "PASSWORD": connection.settings_dict["PASSWORD"],
+            },
+        )
+

@@ -3,10 +3,11 @@ from distutils.version import StrictVersion
 from importlib import import_module
 
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 from django.db.migrations.recorder import \
     MigrationRecorder as DjangoMigrationRecorder
 from django.db.utils import ProgrammingError
+
+import septentrion
 
 
 fixtures_default_tpl = 'fixtures_{}.sql'
@@ -44,30 +45,6 @@ class MigrationRecorder(DjangoMigrationRecorder):
         self.migration_qs.create(app=app, name=name)
 
 
-def get_known_versions():
-    """
-    Return the list of the known versions defined in migration repository,
-    ordered.
-    Ignore symlinks.
-    """
-    # get all subfolders
-    try:
-        dirs = list_dirs(settings.NORTH_MIGRATIONS_ROOT)
-    except OSError:
-        raise ImproperlyConfigured(
-            'settings.NORTH_MIGRATIONS_ROOT is improperly configured.')
-
-    # exclude symlinks and some folders (like schemas, fixtures, etc)
-    versions = [
-        d for d in dirs
-        if not os.path.islink(os.path.join(settings.NORTH_MIGRATIONS_ROOT, d))
-        and is_version(d)]
-
-    # sort versions
-    versions.sort(key=StrictVersion)
-    return versions
-
-
 def get_applied_versions(connection):
     """
     Return the list of applied versions.
@@ -75,7 +52,9 @@ def get_applied_versions(connection):
     """
     recorder = MigrationRecorder(connection)
     applied_versions = list(recorder.migration_qs.filter(
-        app__in=get_known_versions()
+        app__in=septentrion.get_known_versions(
+            MIGRATIONS_ROOT=settings.NORTH_MIGRATIONS_ROOT,
+        )
     ).values_list(
         'app', flat=True).order_by('app').distinct())
 
@@ -162,114 +141,6 @@ def get_applied_migrations(version, connection):
     recorder = MigrationRecorder(connection)
     return list(recorder.migration_qs.filter(app=version).values_list(
         'name', flat=True))
-
-
-def get_migrations_to_apply(version):
-    """
-    Return an dict containing the list of migrations to apply for
-    the given version.
-    Key: name of the migration.
-    Value: path of the migration.
-    """
-    def filter_migrations(files):
-        return [
-            f for f in files
-            if f.endswith('ddl.sql') or f.endswith('dml.sql')]
-
-    version_root = os.path.join(settings.NORTH_MIGRATIONS_ROOT, version)
-    migrations = {}
-
-    # list auto migrations
-    try:
-        files = list_files(version_root)
-    except OSError:
-        raise DBException('No sql folder found for version {}.'.format(
-            version))
-    # filter files (keep *ddl.sql and *dml.sql)
-    auto_migrations = filter_migrations(files)
-    # store migrations
-    for mig in auto_migrations:
-        migrations[mig] = os.path.join(version_root, mig)
-
-    # list manual migrations
-    manual_root = os.path.join(version_root, 'manual')
-    try:
-        files = list_files(manual_root)
-    except OSError:
-        files = []
-    # filter files (keep *ddl.sql and *dml.sql)
-    auto_migrations = filter_migrations(files)
-    # store migrations
-    for mig in auto_migrations:
-        migrations[mig] = os.path.join(manual_root, mig)
-
-    return migrations
-
-
-def get_closest_version(target_version, sql_tpl, force_version=None):
-    """
-    Get the version of a file (schema or fixtures) to use to init a DB.
-    Take the closest to the target_version. Can be the same version, or older.
-    """
-    # get known versions
-    known_versions = get_known_versions()
-    # find target version
-    try:
-        target_version_index = known_versions.index(target_version)
-    except ValueError:
-        raise ImproperlyConfigured(
-            'settings.NORTH_TARGET_VERSION is improperly configured: '
-            'version {} not found.'.format(
-                settings.NORTH_TARGET_VERSION))
-
-    # should we set a version from settings ?
-    if force_version:
-        if force_version not in known_versions[:target_version_index+1]:
-            raise ImproperlyConfigured(
-                'settings.NORTH_TARGET_VERSION is improperly configured: '
-                'settings.NORTH_SCHEMA_VERSION is more recent.')
-
-        path = sql_tpl.format(force_version)
-        if os.path.exists(path):
-            return force_version
-
-        # not found
-        return None
-
-    def get_version(index):
-        version = known_versions[index]
-        schema_path = sql_tpl.format(version)
-        return version, schema_path
-
-    while target_version_index > 0:
-        version, path = get_version(target_version_index)
-        if os.path.exists(path):
-            return version
-        target_version_index -= 1
-
-    version, path = get_version(target_version_index)
-    if os.path.exists(path):
-        return version
-
-    # not found
-    return None
-
-
-def get_fixtures_for_init(target_version):
-    """
-    Get the closest fixtures to use to init a new DB
-    to the current target version.
-    """
-    version = get_closest_version(
-        target_version,
-        os.path.join(
-            settings.NORTH_MIGRATIONS_ROOT,
-            'fixtures',
-            getattr(settings, 'NORTH_FIXTURES_TPL', fixtures_default_tpl)))
-
-    if version is None:
-        raise DBException('Can not find fixtures to init the DB.')
-    return version
 
 
 def is_manual_migration(file_handler):

@@ -141,19 +141,3 @@ def get_applied_migrations(version, connection):
     recorder = MigrationRecorder(connection)
     return list(recorder.migration_qs.filter(app=version).values_list(
         'name', flat=True))
-
-
-def is_manual_migration(file_handler):
-    if '/manual/' in file_handler.name:
-        return True
-
-    if not file_handler.name.endswith('dml.sql'):
-        return False
-
-    for line in file_handler:
-        if '--meta-psql:' in line:
-            file_handler.seek(0)
-            return True
-
-    file_handler.seek(0)
-    return False

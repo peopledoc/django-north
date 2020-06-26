@@ -1,5 +1,7 @@
 import dj_database_url
 import psycopg2
+
+from distutils.version import StrictVersion
 from django.core.management import call_command
 from django.db import connections
 from django.db import DEFAULT_DB_ALIAS
@@ -8,6 +10,8 @@ import pytest
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 from django_north.management import migrations
+
+import septentrion
 
 
 def test_migrate_command_override(mocker):
@@ -92,6 +96,8 @@ def django_db_setup_no_init():
 
 @pytest.mark.django_db
 def test_migrate_command_for_real(django_db_setup_no_init, settings):
+    # from scratch, septentrion will create a migrations table itself
+
     # if DB is not initialized, this return None
     assert migrations.get_current_version(connections['no_init']) is None
 
@@ -100,5 +106,50 @@ def test_migrate_command_for_real(django_db_setup_no_init, settings):
     assert migrations.get_current_version(connections['no_init']) is not None
 
     # check if max applied version is target version
+    assert (migrations.get_applied_versions(connections['no_init'])[-1] ==
+            settings.NORTH_TARGET_VERSION)
+
+
+@pytest.mark.django_db
+def test_migrate_command_with_django_table(django_db_setup_no_init, settings):
+    """
+    This test simulate the case when a project was created to be used with django migrations table
+    Either because it didn't use septentrion-based django-north,
+    or a pre septentrion-base django-north version.
+    """
+    connection = connections['no_init']
+
+    # We begin with an empty database
+    assert migrations.get_current_version(connection) is None
+
+    # We simulate the setup of the database in the past, with a django_migrations table.
+    septentrion.migrate(
+        **{
+            "MIGRATIONS_ROOT": settings.NORTH_MIGRATIONS_ROOT,
+            "target_version": "1.0",
+            "SCHEMA_TEMPLATE": getattr(
+                settings,
+                "NORTH_SCHEMA_TPL",
+                migrations.schema_default_tpl),
+            "DBNAME": connection.settings_dict["NAME"],
+            "HOST": connection.settings_dict["HOST"],
+            "USERNAME": connection.settings_dict["USER"],
+            "PASSWORD": connection.settings_dict["PASSWORD"],
+            "TABLE": "django_migrations",
+            "VERSION_COLUMN": 'app',
+            "NAME_COLUMN": 'name',
+            "APPLIED_COLUMN": 'applied',
+            "CREATE_TABLE": False,
+        },
+    )
+
+    # DB is initialized, this doesn't return None
+    assert migrations.get_current_version(connections['no_init']) is not None
+
+    # and migrate to newer version
+    call_command('migrate', '--database', 'no_init')
+
+    # check if max applied version is target version
+    assert settings.NORTH_TARGET_VERSION != "1.0"
     assert (migrations.get_applied_versions(connections['no_init'])[-1] ==
             settings.NORTH_TARGET_VERSION)

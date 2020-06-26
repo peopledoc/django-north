@@ -54,5 +54,10 @@ class Command(BaseCommand):
                 "HOST": connection.settings_dict["HOST"],
                 "USERNAME": connection.settings_dict["USER"],
                 "PASSWORD": connection.settings_dict["PASSWORD"],
+                "TABLE": "django_migrations",
+                "VERSION_COLUMN": 'app',
+                "NAME_COLUMN": 'name',
+                "APPLIED_COLUMN": 'applied',
+                "CREATE_TABLE": False,
             },
         )

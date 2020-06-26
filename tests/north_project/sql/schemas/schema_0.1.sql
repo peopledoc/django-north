@@ -89,5 +89,5 @@ CREATE TABLE django_migrations (
     "id" serial NOT NULL PRIMARY KEY,
     app character varying(255) NOT NULL,
     name character varying(255) NOT NULL,
-    applied timestamp with time zone NOT NULL
+    applied timestamp with time zone NOT NULL DEFAULT now()
 );

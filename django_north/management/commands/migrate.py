@@ -42,10 +42,7 @@ class Command(BaseCommand):
 
         connection = connections[options['database']]
 
-        recorder = migrations.MigrationRecorder(connection)
-
         septentrion.migrate(
-            migration_applied_callback=recorder.record_applied,
             **{
                 "MIGRATIONS_ROOT": settings.NORTH_MIGRATIONS_ROOT,
                 "target_version": settings.NORTH_TARGET_VERSION,

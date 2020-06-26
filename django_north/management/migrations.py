@@ -3,8 +3,7 @@ from distutils.version import StrictVersion
 from importlib import import_module
 
 from django.conf import settings
-from django.db.migrations.recorder import \
-    MigrationRecorder as DjangoMigrationRecorder
+from django.db.migrations.recorder import MigrationRecorder
 from django.db.utils import ProgrammingError
 
 import septentrion
@@ -34,15 +33,6 @@ def list_dirs(root):
 def list_files(root):
     return [d for d in os.listdir(root)
             if os.path.isfile(os.path.join(root, d))]
-
-
-class MigrationRecorder(DjangoMigrationRecorder):
-    def record_applied(self, app, name):
-        """
-        Records that a migration was applied.
-        """
-        # custom: do not ensure schema
-        self.migration_qs.create(app=app, name=name)
 
 
 def get_applied_versions(connection):

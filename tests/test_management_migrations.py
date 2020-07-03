@@ -1,6 +1,3 @@
-import os
-
-from django.core.exceptions import ImproperlyConfigured
 from django.db import connection
 
 import pytest

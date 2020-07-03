@@ -1,7 +1,6 @@
 import dj_database_url
 import psycopg2
 
-from distutils.version import StrictVersion
 from django.core.management import call_command
 from django.db import connections
 from django.db import DEFAULT_DB_ALIAS
@@ -113,7 +112,8 @@ def test_migrate_command_for_real(django_db_setup_no_init, settings):
 @pytest.mark.django_db
 def test_migrate_command_with_django_table(django_db_setup_no_init, settings):
     """
-    This test simulate the case when a project was created to be used with django migrations table
+    This test simulate the case when a project
+    was created to be used with django migrations table
     Either because it didn't use septentrion-based django-north,
     or a pre septentrion-base django-north version.
     """
@@ -122,7 +122,8 @@ def test_migrate_command_with_django_table(django_db_setup_no_init, settings):
     # We begin with an empty database
     assert migrations.get_current_version(connection) is None
 
-    # We simulate the setup of the database in the past, with a django_migrations table.
+    # We simulate the setup of the database in the past,
+    # with a django_migrations table.
     septentrion.migrate(
         **{
             "MIGRATIONS_ROOT": settings.NORTH_MIGRATIONS_ROOT,

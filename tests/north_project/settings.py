@@ -6,7 +6,7 @@ import dj_database_url
 if "DATABASE_URL" not in os.environ or \
         not os.environ["DATABASE_URL"].startswith("postgres://"):
     print("\n".join(
-        l.strip() for l in
+        line.strip() for line in
         """It seems you have not configured the path to your PGSQL database.
         To do so, use the DATABASE_URL environment variable like this :
 

@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import logging
-import sys
 import septentrion
 
 from importlib import import_module
@@ -201,4 +200,3 @@ Are you sure you want to do this?
                 "PASSWORD": connection.settings_dict["PASSWORD"],
             },
         )
-

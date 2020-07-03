@@ -26,9 +26,8 @@ setup(
     ],
     include_package_data=True,
     install_requires=[
-        "Django>=1.11" if sys.version_info.major == 3 else "Django>=1.11,<2.0",
+        "Django>=1.11",
         "sqlparse",
-        "six",
         "septentrion>=0.3.0",
     ],
     tests_require=["tox"],
@@ -45,10 +44,7 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6'
+        'Programming Language :: Python :: 3.7'
     ],
 )

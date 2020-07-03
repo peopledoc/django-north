@@ -1,6 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
 from django.db import DEFAULT_DB_ALIAS
-from django.utils import six
 
 
 def get_all_contenttypes_for_app_config(app_config, using=DEFAULT_DB_ALIAS):
@@ -38,7 +37,7 @@ def get_unknown_contenttypes_for_app_config(app_config):
 
     return [
         ct
-        for (model_name, ct) in six.iteritems(content_types)
+        for (model_name, ct) in content_types.items()
         if model_name not in app_models
     ]
 
@@ -60,6 +59,6 @@ def get_missing_contenttypes_for_app_config(app_config):
             app_label=app_label,
             model=model_name,
         )
-        for (model_name, model) in six.iteritems(app_models)
+        for (model_name, model) in app_models.items()
         if model_name not in content_types
     ]

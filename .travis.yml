@@ -1,41 +1,23 @@
 # Config file for automatic testing at travis-ci.org
 language: python
 
-addons:
-    postgresql: "9.4"
+services:
+  - postgresql
 
 matrix:
-    include:
-      # Python version is just for the look on travis.
-        - python: 2.7
-          env: TOX_ENV=py27-django111
+  include:
+    # Python version is just for the look on travis.
+    - python: 3.6
+      env: TOX_ENV=py36-django111,py36-django20,py36-django21,py36-django22
 
-        - python: 3.5
-          env: TOX_ENV=py35-django111
+    - python: 3.7
+      env: TOX_ENV=py37-django111,py37-django20,py37-django21,py37-django22
 
-        - python: 3.5
-          env: TOX_ENV=py35-django20
+    - python: 3.8
+      env: TOX_ENV=py38-django111,py38-django20,py38-django21,py38-django22
 
-        - python: 3.5
-          env: TOX_ENV=py35-django21
-
-        - python: 3.5
-          env: TOX_ENV=py35-django22
-
-        - python: 3.6
-          env: TOX_ENV=py36-django111
-
-        - python: 3.6
-          env: TOX_ENV=py36-django20
-
-        - python: 3.6
-          env: TOX_ENV=py36-django21
-
-        - python: 3.6
-          env: TOX_ENV=py36-django22
-
-        - python: 3.6
-          env: TOX_ENV=linters
+    - python: 3.8
+      env: TOX_ENV=linters
 
 install:
   - pip install tox codecov

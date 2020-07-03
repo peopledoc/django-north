@@ -18,8 +18,6 @@ from django.core.management.color import no_style
 from django.db import DEFAULT_DB_ALIAS
 from django.db import connections
 from django.db import transaction
-from django.utils import six
-from django.utils.six.moves import input
 
 from django_north.management.migrations import get_current_version
 from django_north.management.migrations import fixtures_default_tpl
@@ -149,8 +147,7 @@ Are you sure you want to do this?
                     "That's the SQL this command wasn't able to run.\n"
                     "The full error: %s") % (
                         connection.settings_dict['NAME'], e)
-                six.reraise(
-                    CommandError, CommandError(new_msg), sys.exc_info()[2])
+                raise CommandError(new_msg) from e
 
             if not inhibit_post_migrate:
                 self.emit_post_migrate(

@@ -29,7 +29,7 @@ setup(
         "Django>=1.11" if sys.version_info.major == 3 else "Django>=1.11,<2.0",
         "sqlparse",
         "six",
-        "septentrion",
+        "septentrion>=0.3.0",
     ],
     tests_require=["tox"],
     license="MIT",

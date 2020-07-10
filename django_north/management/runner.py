@@ -22,6 +22,14 @@ def clean_sql_code(code):
             continue
         if stripped_line.startswith("--"):
             continue
+        if stripped_line == "\\gset":
+            continue
+        if stripped_line == "\\if":
+            continue
+        if stripped_line == "\\endif":
+            continue
+        if stripped_line == "\\gexec":
+            continue
         output += stripped_line + "\n"
     return output
 

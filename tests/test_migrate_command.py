@@ -139,7 +139,7 @@ def test_migrate_command_with_django_table(django_db_setup_no_init, settings):
             "TABLE": "django_migrations",
             "VERSION_COLUMN": 'app',
             "NAME_COLUMN": 'name',
-            "APPLIED_COLUMN": 'applied',
+            "APPLIED_AT_COLUMN": 'applied',
             "CREATE_TABLE": False,
         },
     )

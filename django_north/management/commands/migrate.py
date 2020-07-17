@@ -57,7 +57,7 @@ class Command(BaseCommand):
                 "TABLE": "django_migrations",
                 "VERSION_COLUMN": 'app',
                 "NAME_COLUMN": 'name',
-                "APPLIED_COLUMN": 'applied',
+                "APPLIED_AT_COLUMN": 'applied',
                 "CREATE_TABLE": False,
             },
         )

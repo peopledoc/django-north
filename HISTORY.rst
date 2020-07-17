@@ -3,10 +3,10 @@
 History
 -------
 
-0.2.7 (unreleased)
-++++++++++++++++++
+0.3.0b1 (2020-07-17)
+++++++++++++++++++++
 
-- Nothing changed yet.
+- Removed the internal logic for applying migrations, use septentrion instead.
 
 
 0.2.6 (2019-10-25)

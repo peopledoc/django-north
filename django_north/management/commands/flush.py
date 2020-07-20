@@ -18,8 +18,8 @@ from django.db import DEFAULT_DB_ALIAS
 from django.db import connections
 from django.db import transaction
 
+from django_north.management.commands import septentrion_settings
 from django_north.management.migrations import get_current_version
-from django_north.management.migrations import fixtures_default_tpl
 
 logger = logging.getLogger(__name__)
 
@@ -187,16 +187,5 @@ Are you sure you want to do this?
         # reload fixtures
         connection = connections[database]
         septentrion.load_fixtures(
-            current_version,
-            **{
-                "MIGRATIONS_ROOT": settings.NORTH_MIGRATIONS_ROOT,
-                "FIXTURES_TEMPLATE": getattr(
-                    settings,
-                    "NORTH_FIXTURES_TPL",
-                    fixtures_default_tpl),
-                "DBNAME": connection.settings_dict["NAME"],
-                "HOST": connection.settings_dict["HOST"],
-                "USERNAME": connection.settings_dict["USER"],
-                "PASSWORD": connection.settings_dict["PASSWORD"],
-            },
+            current_version, **septentrion_settings(connection),
         )

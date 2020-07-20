@@ -4,9 +4,9 @@ import septentrion
 from django.contrib.staticfiles.management.commands.runserver import \
     Command as RunserverCommand
 
-from django.conf import settings
 from django.db import connection
 from django_north.management import migrations
+from django_north.management.commands import septentrion_settings
 
 
 class Command(RunserverCommand):
@@ -15,18 +15,9 @@ class Command(RunserverCommand):
 
     def check_migrations(self):
         try:
-            migration_plan = septentrion.build_migration_plan(**{
-                "MIGRATIONS_ROOT": settings.NORTH_MIGRATIONS_ROOT,
-                "target_version": settings.NORTH_TARGET_VERSION,
-                "SCHEMA_TEMPLATE": getattr(
-                    settings,
-                    "NORTH_SCHEMA_TPL",
-                    migrations.schema_default_tpl),
-                "DBNAME": connection.settings_dict["NAME"],
-                "HOST": connection.settings_dict["HOST"],
-                "USERNAME": connection.settings_dict["USER"],
-                "PASSWORD": connection.settings_dict["PASSWORD"],
-            })
+            migration_plan = septentrion.build_migration_plan(
+                **septentrion_settings(connection)
+            )
         except migrations.DBException as e:
             self.stdout.write(self.style.NOTICE("\n{}\n".format(e)))
             return

@@ -12,6 +12,8 @@ from django_north.management import migrations
 
 import septentrion
 
+from django_north.management.commands import septentrion_settings
+
 
 def test_migrate_command_override(mocker):
     mock_django_handle = mocker.patch(
@@ -45,7 +47,7 @@ def test_migrate_select_database(settings, mocker):
     call_command('migrate')
     assert mock_migrate.called_once()
 
-    dbname = mock_migrate.call_args[1]['DBNAME']
+    dbname = mock_migrate.call_args[1]['dbname']
     assert dbname == settings.DATABASES[DEFAULT_DB_ALIAS]['NAME']
 
     mock_migrate.reset_mock()
@@ -53,7 +55,7 @@ def test_migrate_select_database(settings, mocker):
     call_command('migrate', '--database', 'foo')
     assert mock_migrate.called_once()
 
-    dbname = mock_migrate.call_args[1]['DBNAME']
+    dbname = mock_migrate.call_args[1]['dbname']
     assert dbname == settings.DATABASES['foo']['NAME']
 
 
@@ -124,25 +126,11 @@ def test_migrate_command_with_django_table(django_db_setup_no_init, settings):
 
     # We simulate the setup of the database in the past,
     # with a django_migrations table.
-    septentrion.migrate(
-        **{
-            "MIGRATIONS_ROOT": settings.NORTH_MIGRATIONS_ROOT,
-            "target_version": "1.0",
-            "SCHEMA_TEMPLATE": getattr(
-                settings,
-                "NORTH_SCHEMA_TPL",
-                migrations.schema_default_tpl),
-            "DBNAME": connection.settings_dict["NAME"],
-            "HOST": connection.settings_dict["HOST"],
-            "USERNAME": connection.settings_dict["USER"],
-            "PASSWORD": connection.settings_dict["PASSWORD"],
-            "TABLE": "django_migrations",
-            "VERSION_COLUMN": 'app',
-            "NAME_COLUMN": 'name',
-            "APPLIED_AT_COLUMN": 'applied',
-            "CREATE_TABLE": False,
-        },
-    )
+    updated_settings = septentrion_settings(connection).update({
+        "target_version": "1.0",
+        "TABLE": "django_migrations",
+    })
+    septentrion.migrate(**updated_settings)
 
     # DB is initialized, this doesn't return None
     assert migrations.get_current_version(connections['no_init']) is not None

@@ -6,7 +6,7 @@ from django.db import DEFAULT_DB_ALIAS
 
 def get_all_contenttypes_for_app_config(app_config, using=DEFAULT_DB_ALIAS):
     """
-    Return all contenttypes tht already exists for a given app_config
+    Return all contenttypes that already exists for a given app_config
     """
     ctypes = list()
     for klass in app_config.get_models():

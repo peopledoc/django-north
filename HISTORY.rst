@@ -3,8 +3,8 @@
 History
 -------
 
-0.3.0 (Unreleased)
-++++++++++++++++++
+0.3.0b4 (2020-07-22)
+++++++++++++++++++++
 
 - Remove setting "NORTH_DISCARD_ALL"
 - Add function for septentrion settings

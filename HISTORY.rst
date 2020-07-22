@@ -3,17 +3,13 @@
 History
 -------
 
-0.3.0b2 (2020-07-17)
-++++++++++++++++++++
+0.3.0 (Unreleased)
+++++++++++++++++++
 
+- Remove setting "NORTH_DISCARD_ALL"
+- Add function for septentrion settings
 - Fix classifiers
-
-
-0.3.0b1 (2020-07-17)
-++++++++++++++++++++
-
 - Removed the internal logic for applying migrations, use septentrion instead.
-
 
 0.2.6 (2019-10-25)
 ++++++++++++++++++

@@ -126,9 +126,10 @@ def test_migrate_command_with_django_table(django_db_setup_no_init, settings):
 
     # We simulate the setup of the database in the past,
     # with a django_migrations table.
-    updated_settings = septentrion_settings(connection).update({
+    updated_settings = septentrion_settings(connection)
+    updated_settings.update({
         "target_version": "1.0",
-        "TABLE": "django_migrations",
+        "table": "django_migrations",
     })
     septentrion.migrate(**updated_settings)
 

@@ -3,6 +3,9 @@ language: python
 
 services:
   - postgresql
+env:
+  global:
+    PYTEST_ADDOPTS="--cov-append"
 
 matrix:
   include:

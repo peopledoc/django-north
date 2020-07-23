@@ -26,7 +26,7 @@ setup(
     install_requires=[
         "Django>=1.11",
         "sqlparse",
-        "septentrion>=0.5.1",
+        "septentrion[psycopg2]>=0.5.1",
     ],
     tests_require=["tox"],
     license="MIT",

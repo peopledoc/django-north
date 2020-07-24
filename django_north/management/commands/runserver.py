@@ -22,7 +22,9 @@ class Command(RunserverCommand):
             self.stdout.write(self.style.NOTICE("\n{}\n".format(e)))
             return
 
-        if not septentrion.is_schema_initialized():
+        if not septentrion.is_schema_initialized(
+            **septentrion_settings(connection)
+        ):
             self.stdout.write(self.style.NOTICE("\nSchema not inited.\n"))
             return
 

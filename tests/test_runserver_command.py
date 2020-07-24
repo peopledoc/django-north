@@ -17,7 +17,7 @@ def test_runserver_check_migrations(
     assert captured.out == '\nSomething...\n'
 
     # schema not inited
-    mocker.patch(
+    is_schema_initialized = mocker.patch(
         'septentrion.is_schema_initialized', return_value=False)
     command = runserver.Command()
     mock_plan.side_effect = None
@@ -25,6 +25,8 @@ def test_runserver_check_migrations(
     command.check_migrations()
     captured = capsys.readouterr()
     assert captured.out == '\nSchema not inited.\n'
+    _, kwargs = is_schema_initialized.call_args
+    assert "table" in kwargs
 
     # schema inited, missing migrations
     command = runserver.Command()

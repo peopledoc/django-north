@@ -23,9 +23,9 @@ everywhere.
 Requirements
 ------------
 
-+ **Postgresql only** (>= 9.4)
-+ Django, obviously. v1.11, v2.0, v2.1
-+ Running under Python 2.7, 3.5, 3.6 or 3.7
++ **Postgresql only**
++ Django v1.11, v2.0, v2.1, v2.2
++ Running under Python 3.6, 3.7 or 3.8
 
 Documentation
 -------------

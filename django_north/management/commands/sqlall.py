@@ -99,7 +99,7 @@ def sql_create(app_config, style, connection):
             output += sql_create_model(editor, model)
             final_output.extend(editor.deferred_sql)
             editor.deferred_sql = []
-    if get_docs_version().startswith('2'):
+    if not get_docs_version().startswith('1'):
         # Content of final_output are Statement objects which need to be
         # converted as str
         final_output = [str(statement) for statement in final_output]

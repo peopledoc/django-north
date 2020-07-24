@@ -1,9 +1,8 @@
 from __future__ import unicode_literals
 
-import io
 import logging
-import os
-import sys
+import septentrion
+
 from importlib import import_module
 
 from django.apps import apps
@@ -18,13 +17,9 @@ from django.core.management.color import no_style
 from django.db import DEFAULT_DB_ALIAS
 from django.db import connections
 from django.db import transaction
-from django.utils import six
-from django.utils.six.moves import input
 
+from django_north.management.commands import septentrion_settings
 from django_north.management.migrations import get_current_version
-from django_north.management.migrations import get_fixtures_for_init
-from django_north.management.migrations import fixtures_default_tpl
-from django_north.management.runner import Script
 
 logger = logging.getLogger(__name__)
 
@@ -151,8 +146,7 @@ Are you sure you want to do this?
                     "That's the SQL this command wasn't able to run.\n"
                     "The full error: %s") % (
                         connection.settings_dict['NAME'], e)
-                six.reraise(
-                    CommandError, CommandError(new_msg), sys.exc_info()[2])
+                raise CommandError(new_msg) from e
 
             if not inhibit_post_migrate:
                 self.emit_post_migrate(
@@ -192,12 +186,6 @@ Are you sure you want to do this?
 
         # reload fixtures
         connection = connections[database]
-        fixtures_version = get_fixtures_for_init(current_version)
-        fixtures_path = os.path.join(
-            settings.NORTH_MIGRATIONS_ROOT,
-            'fixtures',
-            getattr(settings, 'NORTH_FIXTURES_TPL', fixtures_default_tpl)
-            .format(fixtures_version))
-        with io.open(fixtures_path, 'r', encoding='utf8') as f:
-            script = Script(f)
-            script.run(connection)
+        septentrion.load_fixtures(
+            current_version, **septentrion_settings(connection),
+        )

@@ -3,6 +3,12 @@
 History
 -------
 
+0.3.1 (2020-07-24)
+++++++++++++++++++
+
+- Fix septentrion call in runserver
+- Bump to septentrion 0.6.1
+
 0.3.0 (2020-07-24)
 ++++++++++++++++++
 

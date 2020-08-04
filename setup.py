@@ -25,7 +25,6 @@ setup(
     include_package_data=True,
     install_requires=[
         "Django>=1.11",
-        "sqlparse",
         "septentrion[psycopg2]>=0.6.1",
     ],
     tests_require=["tox"],

@@ -5,6 +5,7 @@ import septentrion
 
 from importlib import import_module
 
+import django
 from django.apps import apps
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -52,8 +53,16 @@ def sql_flush(style, connection, only_django=False, reset_sequences=True,
     for protected in protected_tables:
         if protected in tables:
             tables.remove(protected)
-    seqs = connection.introspection.sequence_list() if reset_sequences else ()
-    statements = connection.ops.sql_flush(style, tables, seqs, allow_cascade)
+
+    kwargs = {"allow_cascade": allow_cascade}
+    # see commit 75410228dfd16e49eb3c0ea30b59b4c0d2ea6b03
+    if django.VERSION[:2] < (3, 1):
+        seqs = connection.introspection.sequence_list() if reset_sequences else ()
+        kwargs["sequences"] = seqs
+    else:
+        kwargs["reset_sequences"] = reset_sequences
+
+    statements = connection.ops.sql_flush(style, tables, **kwargs)
     return statements
 
 

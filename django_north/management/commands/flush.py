@@ -57,7 +57,10 @@ def sql_flush(style, connection, only_django=False, reset_sequences=True,
     kwargs = {"allow_cascade": allow_cascade}
     # see commit 75410228dfd16e49eb3c0ea30b59b4c0d2ea6b03
     if django.VERSION[:2] < (3, 1):
-        seqs = connection.introspection.sequence_list() if reset_sequences else ()
+        if reset_sequences:
+            seqs = connection.introspection.sequence_list()
+        else:
+            seqs = ()
         kwargs["sequences"] = seqs
     else:
         kwargs["reset_sequences"] = reset_sequences

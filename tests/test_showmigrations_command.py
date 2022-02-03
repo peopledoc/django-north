@@ -41,6 +41,7 @@ def test_showmigrations_schema_inited_but_schema_version_none(capsys, mocker):
     with pytest.raises(AssertionError):
         call_command('showmigrations')
 
+
 def test_showmigrations_schema_not_inited(capsys, mocker):
 
     mock_is_schema_initialized = mocker.patch(
@@ -53,6 +54,7 @@ def test_showmigrations_schema_not_inited(capsys, mocker):
     captured = capsys.readouterr()
 
     assert 'Schema file version is 0.1' in captured.out
+
 
 def test_showmigrations_schema(capsys, mocker):
     # schema inited

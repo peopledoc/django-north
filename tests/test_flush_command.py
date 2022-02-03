@@ -26,6 +26,7 @@ def test_flush(mocker, settings, manage):
     assert mock_handle.called is False
     assert mock_flush.called == bool(manage)
 
+
 @pytest.mark.skipif(django.VERSION[:2] < (3, 2),
                     reason=("requires django>=3.2, see commit "
                             "f997b5e6ae85e2df2342b1a7812fe8130206c957"))
@@ -38,6 +39,7 @@ def test_sql_flush_django(db):
     assert 'sql_version' not in ' '.join(dj_sql_list)
     assert 'django_migrations' not in ' '.join(north_sql_list)
     assert 'sql_version' not in ' '.join(north_sql_list)
+
 
 @pytest.mark.skipif(django.VERSION[:2] >= (3, 2),
                     reason=("requires django<3.2, see commit "

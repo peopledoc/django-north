@@ -30,7 +30,7 @@ def test_north_manage_migrations(mocker, settings, manage):
     assert mock.called == bool(manage)
 
 
-def test_showmigrations_schema_not_inited(capsys, mocker):
+def test_showmigrations_schema_inited_but_schema_version_none(capsys, mocker):
 
     mock_version = mocker.patch(
         'septentrion.db.get_current_schema_version')
@@ -38,11 +38,21 @@ def test_showmigrations_schema_not_inited(capsys, mocker):
     # schema not inited
     mock_version.return_value = None
 
+    with pytest.raises(AssertionError):
+        call_command('showmigrations')
+
+def test_showmigrations_schema_not_inited(capsys, mocker):
+
+    mock_is_schema_initialized = mocker.patch(
+        'septentrion.db.is_schema_initialized')
+
+    # schema not inited
+    mock_is_schema_initialized.return_value = False
+
     call_command('showmigrations')
     captured = capsys.readouterr()
 
-    assert 'Current version is None' in captured.out
-
+    assert 'Schema file version is 0.1' in captured.out
 
 def test_showmigrations_schema(capsys, mocker):
     # schema inited

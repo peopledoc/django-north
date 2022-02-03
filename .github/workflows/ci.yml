@@ -17,7 +17,7 @@ jobs:
 
           - name: Python 3.6 / Django 1.11
             python_version: "3.6"
-            tox_env: py36-django11
+            tox_env: py36-django111
 
           - name: Python 3.7 / Django 2.0
             python_version: "3.7"

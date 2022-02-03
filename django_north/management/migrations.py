@@ -7,6 +7,7 @@ from django.db.migrations.recorder import MigrationRecorder
 from django.db.utils import ProgrammingError
 
 import septentrion
+from django_north.management.commands import septentrion_settings
 
 
 fixtures_default_tpl = 'fixtures_{}.sql'
@@ -41,7 +42,7 @@ def get_applied_versions(connection):
     Reuse django migration table.
     """
     recorder = MigrationRecorder(connection)
-    from django_north.management.commands import septentrion_settings
+
     applied_versions = list(recorder.migration_qs.filter(
         app__in=septentrion.get_known_versions(
             MIGRATIONS_ROOT=settings.NORTH_MIGRATIONS_ROOT,

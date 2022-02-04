@@ -30,7 +30,7 @@ def test_flush(mocker, settings, manage):
 @pytest.mark.skipif(django.VERSION[:2] < (3, 2),
                     reason=("requires django>=3.2, see commit "
                             "f997b5e6ae85e2df2342b1a7812fe8130206c957"))
-def test_sql_flush_django(db):
+def test_sql_flush_django_newer_than_32(db):
     style = no_style()
     dj_sql_list = dj_sql_flush(style, connection)
     north_sql_list = sql_flush(style, connection, only_django=False)
@@ -44,7 +44,7 @@ def test_sql_flush_django(db):
 @pytest.mark.skipif(django.VERSION[:2] >= (3, 2),
                     reason=("requires django<3.2, see commit "
                             "f997b5e6ae85e2df2342b1a7812fe8130206c957"))
-def test_sql_flush(db):
+def test_sql_flush_django_older_than_32(db):
     style = no_style()
     dj_sql_list = dj_sql_flush(style, connection, only_django=False)
     north_sql_list = sql_flush(style, connection, only_django=False)

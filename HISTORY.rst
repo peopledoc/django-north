@@ -3,7 +3,7 @@
 History
 -------
 
-0.3.2 (Unreleased)
+0.3.2 (2022-02-07)
 ++++++++++++++++++
 
 - Add Django 3 compatibility

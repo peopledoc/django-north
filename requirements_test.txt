@@ -1,8 +1,7 @@
 coverage==4.4
-psycopg2>=2.6.2
 dj_database_url>=0.4.1
 django_extensions
 pytest
-pytest-django
+pytest-django==4.2.0
 pytest-mock
 pytest-cov

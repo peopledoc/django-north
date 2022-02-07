@@ -3,6 +3,16 @@
 History
 -------
 
+0.3.2 (Unreleased)
+++++++++++++++++++
+
+- Add Django 3 compatibility
+- Add Github actions
+- Fix settings initialization
+- Pin pytest_django version to solve a known multidb issue
+- Add postgres docker container
+- Pin psycopg2 version to fix utc issue due to incompatible types
+
 0.3.1 (2020-07-24)
 ++++++++++++++++++
 

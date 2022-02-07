@@ -1,9 +1,12 @@
+import django
 from django.core.management import call_command
 from django.utils.version import get_docs_version
 
 import pytest
 
 
+@pytest.mark.skipif(django.VERSION[:2] >= (4, 0),
+                    reason="requires django<4")
 @pytest.mark.django_db
 def test_sqlall(capsys, mocker, settings):
     mocker.patch(
